@@ -1084,7 +1084,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
             var deck = pool.sort(function () { return Math.random() - .5; }).slice(0, 10), idx = 0, liked = [];
             openM('<h3 class="text-xl font-black text-center">شو آكل؟ 🔥</h3><p class="text-center text-zinc-400 text-sm">اسحب يمين للإعجاب ويسار للتخطي</p><div id="sw-area"></div>');
             function cardHTML(c, back) {
-                var im = c.querySelector('.meal-img'), ing = c.querySelector('.meal-ingredients');
+                var im = c.querySelector('.cake-img , .meal-img'), ing = c.querySelector('.meal-ingredients');
                 return '<div class="sw-card' + (back ? ' back' : '') + '"><span class="sw-stamp" data-s="y" style="right:14px;color:#25D366">أعجبني</span><span class="sw-stamp" data-s="n" style="left:14px;color:#e60000">تخطي</span><img src="' + (im ? (im.dataset.src || im.src) : '') + '" alt=""><div class="in"><div class="flex justify-between font-black text-lg"><span>' + c._d.name + '</span><span class="text-o2-red">' + c._d.price + ' ₪</span></div><p class="text-zinc-400 text-sm mt-1" style="display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden">' + (ing ? ing.textContent : '') + '</p></div></div>';
             }
             function render() {
