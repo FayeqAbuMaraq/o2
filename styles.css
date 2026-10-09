@@ -12,6 +12,8 @@
     --ease:cubic-bezier(.22,1,.36,1);
     --dur:.35s; --dur-slow:.7s; --rise:24px;
 }
+    /* ===== ستريك يومي ===== */
+.streak{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;margin-top:var(--space-4);padding:.75rem .95rem;border-radius:16px;background:var(--surface-2);border:1px solid var(--line)}    .streak-flame{font-size:1.7rem;line-height:1;filter:drop-shadow(0 0 8px rgba(250,140,0,.55))}    .streak-txt{display:flex;flex-direction:column;line-height:1.25;font-weight:800}    .streak-n{font-size:1.4rem;font-weight:900;color:var(--gold);display:inline}    .streak-txt small{font-size:.72rem;font-weight:600;color:var(--text-muted)}    .streak-dots{display:flex;gap:.35rem;margin-inline-start:auto;align-items:center}    .streak-dots i{width:.85rem;height:.85rem;border-radius:50%;background:var(--surface-0);border:1px solid var(--line-strong);display:grid;place-items:center;font-style:normal;font-size:.6rem;transition:background var(--dur-2) var(--ease),transform var(--dur-2) var(--ease)}    .streak-dots i:last-child{width:1.2rem;height:1.2rem}    .streak-dots i.on{background:linear-gradient(135deg,var(--gold),var(--red));border-color:transparent;transform:scale(1.08)}    .streak.pop .streak-flame{animation:favPop .7s var(--ease)} 
 html{color-scheme:dark;-webkit-text-size-adjust:100%}
 
         body {
@@ -40,6 +42,7 @@ html{color-scheme:dark;-webkit-text-size-adjust:100%}
             border-radius: 1.5rem;
         }
 
+        
         /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
