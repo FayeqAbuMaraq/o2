@@ -86,22 +86,21 @@ function forceCloseGlobalModal() {
         
         // 1. Animate Number Counter
         function animateValue(obj, start, end, duration) {
-            if (obj && obj.id === 'points-counter' && window.o2CoinBoost) window.o2CoinBoost();
+            if (!obj) return;
+            if (end > start && obj.id === 'points-counter' && window.o2CoinBoost) window.o2CoinBoost();
+            const tok = obj._av = (obj._av || 0) + 1;
             let startTimestamp = null;
             const step = (timestamp) => {
+                if (tok !== obj._av) return;
                 if (!startTimestamp) startTimestamp = timestamp;
                 const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-                // Ease out cubic
                 const easeProgress = 1 - Math.pow(1 - progress, 5);
-                
-                const currentVal = Math.floor(easeProgress * (end - start) + start);
-                // Format with commas
-                obj.innerHTML = currentVal.toLocaleString();
-                
+                const currentVal = Math.round(easeProgress * (end - start) + start);
+                obj.innerHTML = currentVal.toLocaleString('en-US');
                 if (progress < 1) {
                     window.requestAnimationFrame(step);
                 } else {
-                    obj.innerHTML = end.toLocaleString();
+                    obj.innerHTML = end.toLocaleString('en-US');
                 }
             };
             window.requestAnimationFrame(step);
@@ -230,13 +229,17 @@ function forceCloseGlobalModal() {
         // ===== Gold O2 logo, extruded in CSS 3D (spins faster whenever points are added) =====
         (function goldLogo() {
             const host = document.getElementById('o2-coin'); if (!host) return;
-            const D = 6, FRONT = 'linear-gradient(135deg,#fff7c2 0%,#f7c948 42%,#c58a12 100%)', BACK = 'linear-gradient(135deg,#f0c24a,#b8860b)';
-            let html = '';
-            for (let z = -D; z <= D; z++) {
-                const bg = z === D ? FRONT : z === -D ? BACK : (z % 2 ? '#8a5a0b' : '#a8741a');   // the ridges give the sides their depth
-                html += `<i class="oc-l" style="transform:translateZ(${z}px);background:${bg}"></i>`;
-            }
-            host.innerHTML = html;
+            const D = 6;
+            const buildCoin = (T) => {
+                let html = '';
+                for (let z = -D; z <= D; z++) {
+                    const bg = z === D ? T.f : z === -D ? T.k : T.s[z % 2 ? 0 : 1];   // the ridges give the sides their depth
+                    html += `<i class="oc-l" style="transform:translateZ(${z}px);background:${bg}"></i>`;
+                }
+                host.innerHTML = html;
+            };
+            buildCoin({ f: 'linear-gradient(135deg,#fff7c2 0%,#f7c948 42%,#c58a12 100%)', k: 'linear-gradient(135deg,#f0c24a,#b8860b)', s: ['#8a5a0b', '#a8741a'] });
+            window.o2CoinTheme = (T) => { if (T) buildCoin(T); };
             if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) { host.style.transform = 'rotateX(-10deg) rotateY(-25deg)'; return; }
             const BASE = .9; let a = -25, sp = BASE, tg = BASE, vis = true, raf = 0, bt = 0;
             const frame = () => { raf = 0; if (!vis) return; a = (a + sp) % 360; sp += (tg - sp) * .05; host.style.transform = `rotateX(-10deg) rotateY(${a.toFixed(1)}deg)`; raf = requestAnimationFrame(frame); };
@@ -274,7 +277,7 @@ function forceCloseGlobalModal() {
 
         const WM = document.createElement('div');
         WM.id = 'o2-wheel'; WM.className = 'wh-modal';
-        WM.innerHTML = `<div class="wh-box" role="dialog" aria-label="عجلة الحظ اليومية"><button type="button" class="wh-x" aria-label="إغلاق">×</button>
+        WM.innerHTML = `<div class="wh-box" data-lenis-prevent role="dialog" aria-label="عجلة الحظ اليومية"><button type="button" class="wh-x" aria-label="إغلاق">×</button>
             <h3 class="text-xl font-black">عجلة الحظ اليومية 🎡</h3><p class="text-sm text-zinc-400 mt-1">لفّة وحدة مجانية كل يوم · اربح نقاط تروح مباشرة لرصيدك</p>
             <div class="wh-stage"><div class="wh-ptr"></div><div class="wh-wheel" id="wh-wheel">${wheelSVG()}</div></div>
             <button type="button" class="wh-spin" id="wh-spin">لفّ الآن!</button><div class="wh-res" id="wh-res"></div></div>`;
@@ -322,6 +325,7 @@ function forceCloseGlobalModal() {
             if (wheelBusy || wheelDone()) return;
             wheelBusy = true; wheelSession = true; whSpin.disabled = true; whRes.innerHTML = '';
             try { localStorage.setItem(WHEEL_KEY, todayKey()); } catch (e) {}
+            if (window.O2Sound) O2Sound.spin(WHEEL_MS);
             let r = Math.random() * WHEEL.reduce((a, s) => a + s.w, 0), idx = 0;
             for (; idx < WHEEL.length; idx++) { r -= WHEEL[idx].w; if (r < 0) break; }
             const step = 360 / WHEEL.length, jitter = (Math.random() - .5) * step * .6;
@@ -333,8 +337,8 @@ function forceCloseGlobalModal() {
                 wheelBusy = false;
                 whRes.innerHTML = `🎉 ربحت <b>${win}</b> نقطة!<small>الدورة الجاية بعد <span id="wh-cd" dir="ltr"></span></small>`;
                 wheelConfetti();
-                animateValue(counter, cur, cur + win, 1200);
-                animateProgressBar(cur + win, maxTierPoints);
+                if (window.O2Loyalty) { O2Loyalty.earn(win, 'عجلة الحظ', { sound: false }); if (window.O2Sound) O2Sound.play('win'); }
+                else { animateValue(counter, cur, cur + win, 1200); animateProgressBar(cur + win, maxTierPoints); }
                 syncWheelUI(); countdown();
             }, WHEEL_MS + 150);
         });
@@ -357,6 +361,7 @@ function forceCloseGlobalModal() {
         const itemCostEl = document.getElementById('modalItemCost');
 
         function showRedeemModal(itemName, cost) {
+            if (window.O2Loyalty && O2Loyalty.balance() < cost) { O2Loyalty.deny(cost); return; }
             itemNameEl.textContent = itemName;
             itemCostEl.textContent = cost.toLocaleString();
             
@@ -388,15 +393,16 @@ function forceCloseGlobalModal() {
                 btn.classList.remove('bg-o2-red', 'hover:bg-o2-darkRed');
                 btn.classList.add('bg-green-600', 'hover:bg-green-700');
                 
-                // Animate points down (simulated)
-                const currentPoints = parseInt(document.getElementById('points-counter').innerText.replace(/,/g, ''));
+                // Spend points: balance drops, lifetime (tier progress) stays
                 const cost = parseInt(itemCostEl.innerText.replace(/,/g, ''));
-                
-                if(!isNaN(currentPoints) && !isNaN(cost)){
-                     animateValue(document.getElementById('points-counter'), currentPoints, currentPoints - cost, 1000);
-                     o2UpdateLockMeters(currentPoints - cost);
-                     // Update progress bar backward
-                     animateProgressBar(currentPoints - cost, maxTierPoints);
+                if (window.O2Loyalty) O2Loyalty.spend(cost, itemNameEl.textContent);
+                else {
+                    const currentPoints = parseInt(document.getElementById('points-counter').innerText.replace(/,/g, ''));
+                    if (!isNaN(currentPoints) && !isNaN(cost)) {
+                        animateValue(document.getElementById('points-counter'), currentPoints, currentPoints - cost, 1000);
+                        o2UpdateLockMeters(currentPoints - cost);
+                        animateProgressBar(currentPoints - cost, maxTierPoints);
+                    }
                 }
 
                 setTimeout(() => {
@@ -415,6 +421,7 @@ function forceCloseGlobalModal() {
         window.addEventListener('DOMContentLoaded', () => {
             // Start Number Animation
             const startCounters = () => {
+                if (window.O2Loyalty) { O2Loyalty.start(); return; }
                 const pointsCounter = document.getElementById('points-counter');
                 animateValue(pointsCounter, 0, targetPoints, 2000); // Animate over 2 seconds
 
@@ -869,7 +876,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
         document.addEventListener('click', function (e) { if (e.target.closest('.add-btn,.fav-btn,.stepper button')) { vib(); } });
 
         // ---- modal ----
-        var M = document.createElement('div'); M.id = 'o2-modal'; M.innerHTML = '<div class="box"></div>'; document.body.appendChild(M);
+        var M = document.createElement('div'); M.id = 'o2-modal'; M.innerHTML = '<div class="box" data-lenis-prevent></div>'; document.body.appendChild(M);
         var box = $('.box', M);
         function openM(html) { box.innerHTML = '<div class="flex justify-end"><button id="m-x" class="text-2xl text-zinc-400" aria-label="إغلاق">×</button></div>' + html; M.classList.add('open'); document.documentElement.style.overflow = 'hidden'; $('#m-x').onclick = closeM; }
         function closeM() { M.classList.remove('open'); document.documentElement.style.overflow = ''; }
@@ -1078,43 +1085,13 @@ window.addEventListener('beforeinstallprompt', (e) => {
         $('#open-burger').onclick = openBurger;
         ['pointerenter', 'touchstart'].forEach(function (ev) { $('#open-burger').addEventListener(ev, function () { loadThree().catch(function () {}); }, { once: true, passive: true }); });
 
-        // ---- what should I eat (swipe) ----
-        function openSwipe() {
-            var pool = [].slice.call(document.querySelectorAll('#menu .meal-card')).filter(function (c) { return c._d && c._d.price; });
-            var deck = pool.sort(function () { return Math.random() - .5; }).slice(0, 10), idx = 0, liked = [];
-            openM('<h3 class="text-xl font-black text-center">شو آكل؟ 🔥</h3><p class="text-center text-zinc-400 text-sm">اسحب يمين للإعجاب ويسار للتخطي</p><div id="sw-area"></div>');
-            function cardHTML(c, back) {
-                var im = c.querySelector('.cake-img , .meal-img'), ing = c.querySelector('.meal-ingredients');
-                return '<div class="sw-card' + (back ? ' back' : '') + '"><span class="sw-stamp" data-s="y" style="right:14px;color:#25D366">أعجبني</span><span class="sw-stamp" data-s="n" style="left:14px;color:#e60000">تخطي</span><img src="' + (im ? (im.dataset.src || im.src) : '') + '" alt=""><div class="in"><div class="flex justify-between font-black text-lg"><span>' + c._d.name + '</span><span class="text-o2-red">' + c._d.price + ' ₪</span></div><p class="text-zinc-400 text-sm mt-1" style="display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden">' + (ing ? ing.textContent : '') + '</p></div></div>';
-            }
-            function render() {
-                var a = $('#sw-area');
-                if (idx >= deck.length) {
-                    a.innerHTML = liked.length ? '<h4 class="font-black my-3 text-center">اخترنا لك ❤</h4>' + liked.map(function (c, i) { return '<div class="cart-row"><div class="nm">' + c._d.name + '<small>' + c._d.price + ' ₪ · ★ ' + O2cart.pts(c._d.price) + ' نقطة</small></div><button class="add-btn" data-i="' + i + '">أضف</button></div>'; }).join('') + '<button id="sw-again" class="w-full mt-3 py-3 rounded-xl bg-surface-3 font-bold">جولة جديدة 🔄</button>' : '<p class="text-center py-10 text-zinc-400">ما اخترت شي! جرّب جولة ثانية</p><button id="sw-again" class="w-full py-3 rounded-xl bg-o2-red font-bold">جولة جديدة 🔄</button>';
-                    a.onclick = function (e) { var b = e.target.closest('.add-btn[data-i]'); if (b) { var c = liked[b.dataset.i], x = c.querySelector('.add-btn'); if (x) x.click(); b.textContent = '✓'; } if (e.target.id === 'sw-again') openSwipe(); };
-                    return;
-                }
-                a.onclick = null;
-                a.innerHTML = '<div class="sw-wrap">' + (deck[idx + 1] ? cardHTML(deck[idx + 1], 1) : '') + cardHTML(deck[idx]) + '</div><div class="sw-btns"><button id="sw-n">✕</button><button id="sw-y">❤</button></div>';
-                var el = a.querySelectorAll('.sw-card'); el = el[el.length - 1]; var x0 = null, dx = 0;
-                function stamps() { el.querySelector('[data-s=y]').style.opacity = Math.max(0, dx / 90); el.querySelector('[data-s=n]').style.opacity = Math.max(0, -dx / 90); }
-                el.onpointerdown = function (e) { x0 = e.clientX; el.classList.add('drag'); el.setPointerCapture(e.pointerId); };
-                el.onpointermove = function (e) { if (x0 === null) return; dx = e.clientX - x0; el.style.transform = 'translateX(' + dx + 'px) rotate(' + dx / 18 + 'deg)'; stamps(); };
-                el.onpointerup = function () { if (x0 === null) return; x0 = null; el.classList.remove('drag'); Math.abs(dx) > 90 ? go(dx > 0) : (dx = 0, el.style.transform = '', stamps()); };
-                function go(like) {
-                    el.style.transform = 'translateX(' + (like ? 600 : -600) + 'px) rotate(' + (like ? 30 : -30) + 'deg)'; vib();
-                    var c = deck[idx]; if (like) { liked.push(c); if (!c.classList.contains('is-fav')) c.querySelector('.fav-btn').click(); }
-                    idx++; setTimeout(render, 280);
-                }
-                $('#sw-y').onclick = function () { go(true); }; $('#sw-n').onclick = function () { go(false); };
-            }
-            render();
-        }
-        $('#open-swipe').onclick = openSwipe;
+        // ---- what should I eat (swipe): see swipe.js ----
+        window.O2UI = { $: $, openM: openM, closeM: closeM, vib: vib, confetti: confetti };
+        $('#open-swipe').onclick = function () { window.O2Swipe && O2Swipe.open(); };
 
                 // ---- scroll reveal: نظام واحد لكل الموقع (تتابع + easing موحّد) ----
         (function () {
-            var sel = '[data-reveal],.reward-card,#how .grid > div,#menu .o2-tool,#menu .meal-card:not(.cake-card),.fb-box';
+            var sel = '[data-reveal],.reward-card,#how .grid > div,#menu .o2-tool,#menu .meal-card:not(.cake-card),.fb-box,#menu .menu-section';
             var els = [].slice.call(document.querySelectorAll(sel));
             els.forEach(function (el) { if (!el.hasAttribute('data-reveal')) el.setAttribute('data-reveal', ''); });
             if (!('IntersectionObserver' in window)) { els.forEach(function (el) { el.classList.add('in'); }); return; }
@@ -1133,7 +1110,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
             }, { threshold: .08, rootMargin: '0px 0px -4% 0px' });
             var started = false;
             function boot() { if (started) return; started = true; els.forEach(function (el) { io.observe(el); }); }
-            if (window.__o2IntroPlaying) { window.addEventListener('o2-intro-reveal', boot, { once: true }); setTimeout(boot, 9000); } else boot();
+            if (window.__o2IntroPlaying) { window.addEventListener('o2-intro-reveal', boot, { once: true }); setTimeout(boot, 14000); } else boot();
         })();
 
     })();
