@@ -108,7 +108,7 @@
         var r = $('tier-road'); if (!r) return;
         r.innerHTML = TIERS.map(function (t, i) {
             var node = '<div class="tr-node" data-i="' + i + '" style="--c:' + t.accent + '"><svg class="ic" aria-hidden="true"><use href="#' + t.icon + '"/></svg><b>' + t.name + '</b><small>' + fmt(t.min) + '</small></div>';
-            var link = i < TIERS.length - 1 ? '<div class="tr-link" data-l="' + i + '" style="--c1:' + t.accent + ';--c2:' + TIERS[i + 1].accent + '"><i class="tr-fill"></i><i class="tr-spark"></i></div>' : '';
+            var link = i < TIERS.length - 1 ? '<div class="tr-link" data-l="' + i + '" style="z-index: -1; --c1:' + t.accent + ';--c2:' + TIERS[i + 1].accent + '"><i class="tr-fill"></i><i class="tr-spark"></i></div>' : '';
             return node + link;
         }).join('');
     }
