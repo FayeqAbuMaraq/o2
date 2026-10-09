@@ -1162,24 +1162,24 @@ window.addEventListener('beforeinstallprompt', (e) => {
             if (HOT.test(t + ' ' + ing)) tags.push(['hot', '🌶️ حار']);
             if (sec && sec.id === 'italian' && !MEAT.test(t + ' ' + ing)) tags.push(['veg', '🌱 نباتي']);
             if (!tags.length) return;
-            var box = document.createElement('div'); box.className = 'mtags';
-            box.innerHTML = tags.map(function (g) { return '<span class="mtag ' + g[0] + '">' + g[1] + '</span>'; }).join('');
+            var box = document.createElement('div'); box.className = 'mtags ';
+            box.innerHTML = tags.map(function (g) { return '<span class="mtag  h-fit block ' + g[0] + '">' + g[1] + '</span>'; }).join('');
             card.insertBefore(box, card.firstChild);
         });
-        // ===== صورة دائرية صغيرة على الكرت وهو مسكّر (بتتحمّل لما الكرت يقرب من الشاشة) =====
-        var thumbIO = 'IntersectionObserver' in window ? new IntersectionObserver(function (es) {
-            es.forEach(function (e) { if (e.isIntersecting) { thumbIO.unobserve(e.target); e.target.src = e.target.dataset.src; } });
-        }, { rootMargin: '250px' }) : null;
-        document.querySelectorAll('#menu .meal-card').forEach(function (card) {
-            var big = card.querySelector('.meal-img'), icon = card.querySelector('.accordion-btn > div > .ic');
-            if (!big || !big.dataset.src || !icon) return;
-            var th = document.createElement('span'); th.className = 'mthumb';
-            var im = document.createElement('img'); im.alt = ''; im.decoding = 'async'; im.dataset.src = big.dataset.src;
-            im.onload = function () { im.classList.add('ok'); };
-            im.onerror = function () { if (th.parentNode) th.parentNode.replaceChild(icon, th); };      // لو الصورة ما اشتغلت بيرجع الأيقونة القديمة
-            th.appendChild(im); icon.parentNode.replaceChild(th, icon);
-            if (thumbIO) thumbIO.observe(im); else im.src = im.dataset.src;
-        });
+        // // ===== صورة دائرية صغيرة على الكرت وهو مسكّر (بتتحمّل لما الكرت يقرب من الشاشة) =====
+        // var thumbIO = 'IntersectionObserver' in window ? new IntersectionObserver(function (es) {
+        //     es.forEach(function (e) { if (e.isIntersecting) { thumbIO.unobserve(e.target); e.target.src = e.target.dataset.src; } });
+        // }, { rootMargin: '250px' }) : null;
+        // document.querySelectorAll('#menu .meal-card').forEach(function (card) {
+        //     var big = card.querySelector('.meal-img'), icon = card.querySelector('.accordion-btn > div > .ic');
+        //     if (!big || !big.dataset.src || !icon) return;
+        //     var th = document.createElement('span'); th.className = 'mthumb';
+        //     var im = document.createElement('img'); im.alt = ''; im.decoding = 'async'; im.dataset.src = big.dataset.src;
+        //     im.onload = function () { im.classList.add('ok'); };
+        //     im.onerror = function () { if (th.parentNode) th.parentNode.replaceChild(icon, th); };      // لو الصورة ما اشتغلت بيرجع الأيقونة القديمة
+        //     th.appendChild(im); icon.parentNode.replaceChild(th, icon);
+        //     if (thumbIO) thumbIO.observe(im); else im.src = im.dataset.src;
+        // });
 
 
         // ===== رأيك يهمنا =====
