@@ -13,7 +13,7 @@
     --dur:.35s; --dur-slow:.7s; --rise:24px;
 }
     /* ===== ستريك يومي ===== */
-.streak{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;margin-top:var(--space-4);padding:.75rem .95rem;border-radius:16px;background:var(--surface-2);border:1px solid var(--line)}    .streak-flame{font-size:1.7rem;line-height:1;filter:drop-shadow(0 0 8px rgba(250,140,0,.55))}    .streak-txt{display:flex;flex-direction:column;line-height:1.25;font-weight:800}    .streak-n{font-size:1.4rem;font-weight:900;color:var(--gold);display:inline}    .streak-txt small{font-size:.72rem;font-weight:600;color:var(--text-muted)}    .streak-dots{display:flex;gap:.35rem;margin-inline-start:auto;align-items:center}    .streak-dots i{width:.85rem;height:.85rem;border-radius:50%;background:var(--surface-0);border:1px solid var(--line-strong);display:grid;place-items:center;font-style:normal;font-size:.6rem;transition:background var(--dur-2) var(--ease),transform var(--dur-2) var(--ease)}    .streak-dots i:last-child{width:1.2rem;height:1.2rem}    .streak-dots i.on{background:linear-gradient(135deg,var(--gold),var(--red));border-color:transparent;transform:scale(1.08)}    .streak.pop .streak-flame{animation:favPop .7s var(--ease)} 
+.streak{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;margin-top:var(--sp-4);padding:.75rem .95rem;border-radius:16px;background:var(--s2);border:1px solid var(--line)}    .streak-flame{font-size:1.7rem;line-height:1;filter:drop-shadow(0 0 8px rgba(250,140,0,.55))}    .streak-txt{display:flex;flex-direction:column;line-height:1.25;font-weight:800}    .streak-n{font-size:1.4rem;font-weight:900;color:var(--gold);display:inline}    .streak-txt small{font-size:.72rem;font-weight:600;color:#a1a1aa}    .streak-dots{display:flex;gap:.35rem;margin-inline-start:auto;align-items:center}    .streak-dots i{width:.85rem;height:.85rem;border-radius:50%;background:var(--s1);border:1px solid var(--line-strong);display:grid;place-items:center;font-style:normal;font-size:.6rem;transition:background var(--dur) var(--ease),transform var(--dur) var(--ease)}    .streak-dots i:last-child{width:1.2rem;height:1.2rem}    .streak-dots i.on{background:linear-gradient(135deg,var(--gold),var(--red));border-color:transparent;transform:scale(1.08)}    .streak.pop .streak-flame{animation:favPop .7s var(--ease)} 
 html{color-scheme:dark;-webkit-text-size-adjust:100%}
 
         body {
@@ -225,6 +225,7 @@ html{color-scheme:dark;-webkit-text-size-adjust:100%}
         .fav-empty{display:none;text-align:center;color:#a1a1aa;padding:var(--sp-8) 0}
         #menu.fav-mode .meal-card:not(.is-fav){display:none!important}
         #menu.fav-mode .meal-card.is-fav{display:block!important}
+#menu.fav-mode .cake-card.is-fav{display:flex!important}
         #menu.fav-mode .menu-section.no-fav,#menu.fav-mode .show-more-wrapper{display:none!important}
         #menu.fav-mode.fav-none .fav-empty{display:block}
         .meal-actions{display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap;padding:var(--sp-3) var(--sp-4);border-top:1px solid rgba(63,63,70,.5)}
@@ -261,19 +262,6 @@ html{color-scheme:dark;-webkit-text-size-adjust:100%}
         #o2-modal.open{display:flex}
         #o2-modal .box{width:min(100%,440px);max-height:92vh;overflow-y:auto;background:var(--s2);border:1px solid #2a2a2a;border-radius:24px;padding:var(--sp-5);animation:favPop .0s,mIn .3s}
         @keyframes mIn{from{opacity:0;transform:translateY(30px) scale(.96)}}
-        .bb-stack{height:270px;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;margin:var(--sp-2) 0}
-        .bb-stack>div{width:190px;margin-top:-5px;flex:none}
-        .bb-new{animation:drop .45s var(--ease)}
-        @keyframes drop{from{transform:translateY(-120px);opacity:0}}
-        .bb-top{height:56px;border-radius:100px 100px 14px 14px;background:radial-gradient(circle at 30% 30%,#fff8 2px,transparent 3px) 0 0/22px 18px,linear-gradient(#e29a3a,#c97a22)}
-        .bb-bot{height:30px;border-radius:8px 8px 40px 40px;background:linear-gradient(#c97a22,#a9611a)}
-        .bb-beef{height:28px;border-radius:14px;background:#5d3a1a}.bb-chicken{height:26px;border-radius:12px;background:#e0a83c}
-        .bb-cheese{height:18px;background:#ffc107;clip-path:polygon(0 0,100% 0,100% 55%,85% 100%,70% 55%,50% 100%,30% 55%,15% 100%,0 55%)}
-        .bb-lettuce{height:14px;background:#5cb85c;border-radius:10px;transform:scaleX(1.08)}.bb-tomato{height:12px;background:#e53935;border-radius:8px}
-        .bb-onion{height:8px;background:#e9d8f5;border-radius:8px}.bb-pickle{height:8px;background:#7cb342;border-radius:8px}.bb-sauce{height:9px;background:#ff7043;border-radius:9px}
-        .bb-ing{display:flex;flex-wrap:wrap;gap:var(--sp-2);justify-content:center}
-        .bb-ing button{padding:var(--sp-2) var(--sp-3);border-radius:99px;background:var(--s3);border:1px solid #3f3f46;font-size:.82rem;font-weight:700}
-        .bb-ing button:active{background:#e60000}
         .sw-wrap{position:relative;height:360px;margin:var(--sp-2) 0}
         .sw-card{position:absolute;inset:0;border-radius:20px;background:var(--s3);border:1px solid #333;overflow:hidden;touch-action:none;user-select:none;transition:transform .3s var(--ease)}
         .sw-card.drag{transition:none}.sw-card img{width:100%;height:190px;object-fit:cover;background:var(--s1);pointer-events:none}
@@ -332,15 +320,6 @@ html{color-scheme:dark;-webkit-text-size-adjust:100%}
             .o2-bottle .ob-tilt::before,.o2-bottle .ob-tilt::after,.o2-bottle .ob-bub,.o2-bottle .ob-shine{animation:none}
         }
 
-        /* ===== Burger builder: per-ingredient limits ===== */
-        .bb-ing button{display:inline-flex;align-items:center;gap:var(--sp-1);transition:opacity .2s var(--ease),filter .2s var(--ease)}
-        .bb-ing button .bb-c{font-style:normal;font-size:.68rem;color:#facc15;background:#0006;border-radius:99px;padding:0 var(--sp-2)}
-        .bb-ing button.maxed{opacity:.4;filter:grayscale(1)}
-        .bb-ing button.maxed .bb-c{color:#f87171}
-        .bb-msg{min-height:1.3rem;text-align:center;font-size:.8rem;font-weight:700;color:#facc15;margin:var(--sp-1) 0 0}
-        .bb-shake{animation:bbshake .35s}
-        @keyframes bbshake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
-        #bb-undo:disabled{opacity:.4}
 
         /* ===== Daily lucky wheel ===== */
         .wh-btn{position:relative;display:flex;align-items:center;justify-content:center;gap:var(--sp-2);width:100%;margin-top:var(--sp-5);padding:var(--sp-3);border-radius:14px;font-weight:800;
@@ -377,11 +356,6 @@ html{color-scheme:dark;-webkit-text-size-adjust:100%}
         .ob-win.show{display:block;animation:obwin .6s var(--ease)}
         @keyframes obwin{0%{transform:scale(.6);opacity:0}100%{transform:scale(1);opacity:1}}
 
-        /* ===== 3D burger ===== */
-        .bb-stack3d{display:block!important;height:300px;position:relative;cursor:grab;background:radial-gradient(ellipse at 50% 72%,rgba(230,0,0,.25),transparent 65%)}
-        .bb-stack3d:active{cursor:grabbing}
-        .bb-stack3d canvas{display:block;margin:0 auto}
-        .bb-hint{text-align:center;font-size:.72rem;color:#71717a;margin-top:calc(var(--sp-1) * -1)}
 
         /* ===== Gold O2 logo (3D extruded) ===== */
         .o2-coin{width:58px;height:55px;perspective:520px;flex-shrink:0;align-self:center;filter:drop-shadow(0 0 10px rgba(250,204,21,.45))}
@@ -530,3 +504,208 @@ a,button,[role=button],.o2-tool,.cat-chip{-webkit-tap-highlight-color:transparen
         .cake-card:hover { transform: none; }
         .cake-card.is-center { border-color: rgba(220,38,38,.65); box-shadow: 0 22px 44px -10px rgba(220,38,38,.45); }
     }
+
+/* ===== Rewards: unified card, locked / unlocked by points ===== */
+.rw-img{max-height:100%;max-width:100%;width:auto;height:auto;object-fit:contain;display:block}
+.reward-card .rw-art{flex:none}
+.reward-card .lock-meter{margin-bottom:var(--sp-4)}
+.rw-badge{flex:none;display:inline-flex;align-items:center;gap:4px;font-size:.625rem;font-weight:700;line-height:1;padding:.375rem .5rem;border-radius:.375rem;white-space:nowrap;background:var(--s2);color:#a1a1aa;border:1px solid rgba(63,63,70,.9)}
+.rw-foot{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);margin-top:auto;padding-top:var(--sp-3);border-top:1px solid rgba(42,42,42,.6)}
+.rw-btn{flex:none;min-height:40px;padding:.5rem 1.25rem;border-radius:.625rem;font-weight:800;font-size:.875rem;white-space:nowrap;text-align:center;transition:background-color .2s var(--ease),box-shadow .2s var(--ease)}
+.rw-btn .rw-lk{display:none}
+.reward-card:hover .rw-img{transform:scale(1.08)}
+
+/* unlocked = normal card: no lock layer, no badge, no progress line */
+.reward-card:not(.is-locked) .rw-lock,
+.reward-card:not(.is-locked) .rw-badge,
+.reward-card:not(.is-locked) .lock-meter{display:none!important}
+.reward-card:not(.is-locked) .rw-btn{background:var(--red);color:#fff;box-shadow:0 0 12px rgba(230,0,0,.4)}
+.reward-card:not(.is-locked) .rw-btn:hover{background:var(--red-dark);box-shadow:0 0 18px rgba(230,0,0,.7)}
+
+/* locked = dimmed, with lock layer + "ناقصك N نقطة" line */
+.reward-card.is-locked{cursor:default}
+.reward-card.is-locked:hover{transform:none;box-shadow:none;border-color:rgba(63,63,70,.9)}
+.reward-card.is-locked:hover::before{left:-100%}
+.reward-card.is-locked:hover .rw-img{transform:none}
+.reward-card.is-locked .rw-art>img,.reward-card.is-locked .rw-art>svg{filter:grayscale(1);opacity:.4}
+.reward-card.is-locked h3{color:#d4d4d8}
+.reward-card.is-locked .rw-desc{color:#71717a}
+.reward-card.is-locked .rw-price{opacity:.6;filter:grayscale(1)}
+.reward-card.is-locked .rw-btn{background:var(--s2);color:#a1a1aa;border:1px solid rgba(63,63,70,.9);cursor:not-allowed;box-shadow:none}
+.reward-card.is-locked .rw-btn .rw-go{display:none}
+.reward-card.is-locked .rw-btn .rw-lk{display:inline}
+
+/* ===== Community bottle (وجبة معلّقة) ===== */
+.cb{display:grid;gap:var(--sp-6);padding:var(--sp-6);align-items:center}
+@media (min-width:768px){.cb{grid-template-columns:auto 1fr;gap:var(--sp-8);padding:var(--sp-8)}}
+.cb-visual{display:flex;flex-direction:column;align-items:center;gap:var(--sp-3)}
+.cb-bottle.o2-bottle{width:clamp(170px,46vw,250px)}
+.cb-pct{font-weight:900;font-size:2.25rem;line-height:1;color:#fff}
+.cb-pct em{font-style:normal;color:var(--red);margin-inline-start:2px}
+.cb-title{font-size:1.875rem;font-weight:900}
+.cb-sub{color:#a1a1aa;margin-top:var(--sp-2);line-height:1.8}
+.cb-sub b{color:#fff}
+.cb-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-3);margin:var(--sp-5) 0}
+.cb-stat{background:rgba(0,0,0,.3);border:1px solid rgba(42,42,42,.8);border-radius:14px;padding:var(--sp-3) var(--sp-2);text-align:center}
+.cb-stat b{display:block;font-size:1.25rem;font-weight:900;color:#fff}
+.cb-stat small{display:block;margin-top:2px;font-size:.68rem;font-weight:600;color:#a1a1aa;line-height:1.4}
+.cb-chips{display:flex;flex-wrap:wrap;gap:var(--sp-2);margin-bottom:var(--sp-3)}
+.cb-chip{min-width:64px;min-height:44px;padding:0 var(--sp-4);border-radius:99px;background:var(--s3);border:1px solid #3f3f46;color:#e4e4e7;font-weight:800;transition:background-color .2s var(--ease),border-color .2s var(--ease)}
+.cb-chip[aria-pressed="true"]{background:var(--red);border-color:var(--red);color:#fff}
+.cb-give{width:100%;min-height:50px;border-radius:14px;background:var(--red);color:#fff;font-weight:900;box-shadow:0 0 16px rgba(230,0,0,.4);transition:background-color .2s var(--ease),transform .2s var(--ease)}
+.cb-give:hover{background:var(--red-dark)}
+.cb-give:active{transform:scale(.98)}
+.cb-msg{min-height:1.4rem;margin-top:var(--sp-2);font-size:.85rem;font-weight:700;color:#facc15}
+.cb-msg.err{color:#f87171}
+.cb-last{margin-top:var(--sp-1);font-size:.75rem;color:#71717a}
+.cb-last[hidden]{display:none}
+
+/* ===== ابعت بطاقة: نموذج الإرسال ===== */
+.bm-sub{color:#a1a1aa;font-size:.85rem;text-align:center;margin:var(--sp-1) 0 var(--sp-2)}
+.bm-lbl{display:block;font-size:.8rem;font-weight:700;color:#d4d4d8;margin:var(--sp-3) 0 var(--sp-1)}
+.bm-lbl small{color:#71717a;font-weight:600}
+.bm-in{display:block;width:100%;margin-top:var(--sp-1);padding:var(--sp-3);border-radius:12px;background:var(--s3);border:1px solid #3f3f46;color:#fff;font:inherit;font-size:16px}
+.bm-in:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 3px rgba(230,0,0,.2)}
+.bm-count{display:block;text-align:left;font-size:.7rem;color:#71717a;margin-top:var(--sp-1)}
+.bm-gifts{display:flex;flex-wrap:wrap;gap:var(--sp-2)}
+.bm-gifts button{min-height:40px;padding:0 var(--sp-3);border-radius:99px;background:var(--s3);border:1px solid #3f3f46;color:#e4e4e7;font-size:.8rem;font-weight:800}
+.bm-gifts button[aria-pressed="true"]{background:var(--red);border-color:var(--red);color:#fff}
+.bm-err{min-height:1.2rem;color:#f87171;font-size:.8rem;font-weight:700;margin-top:var(--sp-2)}
+.bm-go,.bm-wa,.bm-copy{display:flex;align-items:center;justify-content:center;width:100%;min-height:48px;border-radius:14px;font-weight:900;text-align:center;text-decoration:none}
+.bm-go{background:var(--red);color:#fff;margin-top:var(--sp-2)}
+.bm-wa{background:var(--wa);color:#04210f;margin-top:var(--sp-4)}
+.bm-copy{background:var(--s3);border:1px solid #3f3f46;color:#e4e4e7;margin-top:var(--sp-2)}
+.bm-done{text-align:center}
+.bm-done h3{font-size:1.25rem;font-weight:900;margin-top:var(--sp-3)}
+.bm-done p{color:#a1a1aa;font-size:.85rem;margin-top:var(--sp-2);line-height:1.7}
+
+/* ===== بطاقة من O2 ===== */
+.gc-view{position:fixed;inset:0;z-index:300;display:flex;justify-content:center;overflow-y:auto;box-sizing:border-box;
+    padding:var(--sp-4) max(var(--sp-4),env(safe-area-inset-right,0px)) var(--sp-4) max(var(--sp-4),env(safe-area-inset-left,0px));
+    background:radial-gradient(90% 70% at 50% 0%,rgba(230,0,0,.28),transparent 65%),#0c0c0c;animation:gcFade .5s var(--ease)}
+@keyframes gcFade{from{opacity:0}}
+.gc-x{position:fixed;top:calc(var(--sp-3) + env(safe-area-inset-top,0px));left:max(var(--sp-3),env(safe-area-inset-left,0px));z-index:2;width:44px;height:44px;border:0;border-radius:50%;background:rgba(255,255,255,.1);color:#fff;font-size:1.6rem;line-height:1}
+.gc-stage{box-sizing:border-box;width:min(100%,420px);margin:auto;padding:var(--sp-8) 0}
+.gc-card{box-sizing:border-box;width:100%;overflow:hidden;border-radius:22px;text-align:right;background:linear-gradient(160deg,#202020,#141414);border:1px solid rgba(230,0,0,.4);
+    box-shadow:0 24px 60px rgba(0,0,0,.6),0 0 40px rgba(230,0,0,.18);animation:gcRise .6s var(--ease)}
+.gc-card.is-open{animation:gcPop .45s var(--ease)}
+@keyframes gcRise{from{opacity:0;transform:translateY(24px) scale(.96)}}
+@keyframes gcPop{from{transform:scale(.97)}}
+.gc-top{display:flex;align-items:center;gap:var(--sp-3);padding:var(--sp-4) var(--sp-5);background:linear-gradient(135deg,#e60000,#8f0000)}
+.gc-logo{flex:none;display:flex;align-items:center;justify-content:center;width:42px;height:42px;padding:5px;box-sizing:border-box;border-radius:50%;background:#fff;color:#e60000;font-weight:900;font-size:.8rem}
+.gc-logo img{width:100%;height:100%;object-fit:contain}
+.gc-brand{font-weight:900;letter-spacing:.08em;color:#fff}
+.gc-brand span{color:#fde047}
+.gc-body{padding:var(--sp-6) var(--sp-5)}
+.gc-hello{font-size:1.35rem;font-weight:900;color:#fff;text-align:center}
+.gc-tip{margin-top:var(--sp-2);text-align:center;color:#a1a1aa;font-size:.9rem}
+.gc-open{display:block;width:100%;min-height:48px;margin-top:var(--sp-5);border:0;border-radius:14px;background:var(--red);color:#fff;font-weight:900;box-shadow:0 0 18px rgba(230,0,0,.45)}
+.gc-to{margin-bottom:var(--sp-2);font-weight:800;color:#fca5a5}
+.gc-text{font-size:1.2rem;font-weight:700;line-height:1.9;color:#fff;white-space:pre-wrap;overflow-wrap:anywhere}
+.gc-from{margin-top:var(--sp-4);font-weight:800;color:#a1a1aa}
+.gc-gift{display:inline-flex;align-items:center;gap:6px;margin-top:var(--sp-4);padding:.4rem .9rem;border-radius:99px;background:rgba(250,204,21,.1);border:1px dashed rgba(250,204,21,.6);color:#fde047;font-weight:800;font-size:.9rem}
+.gc-note{min-height:1.1rem;margin-top:var(--sp-3);font-size:.85rem;font-weight:800;color:#fde047}
+.gc-acts{display:grid;gap:var(--sp-2);margin-top:var(--sp-3)}
+.gc-claim{min-height:46px;border:0;border-radius:12px;background:var(--red);color:#fff;font-weight:900}
+.gc-claim[hidden]{display:none}
+.gc-reply{min-height:44px;border-radius:12px;background:transparent;border:1px solid #3f3f46;color:#e4e4e7;font-weight:800}
+.gc-prev{margin:var(--sp-4) 0 var(--sp-2)}
+.gc-prev .gc-card{animation:none}
+.gc-prev .gc-body{padding:var(--sp-4)}
+.gc-prev .gc-text{font-size:1rem;line-height:1.7}
+@media (prefers-reduced-motion:reduce){.gc-view,.gc-card,.gc-card.is-open{animation:none}}
+
+/* resets so the new controls look the same with or without Tailwind preflight */
+.cb-give,.bm-go,.gc-open,.gc-claim{border:0}
+.bm-in{box-sizing:border-box}
+.cb,.cb-stat,.cb-give,.gc-open{box-sizing:border-box}
+
+/* ===== الهاتف بوضع أفقي (landscape): شاشة عريضة وقصيرة ===== */
+@media (orientation:landscape) and (max-height:500px){
+    /* الـ notch: الشاشة بتغطي كل الجوانب (viewport-fit=cover) */
+    body{padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+    #navbar,.bottom-nav{padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+    #cart-fab{left:calc(14px + env(safe-area-inset-left,0px));bottom:12px}
+    #o2-toast{bottom:64px}
+
+    /* الشريط العلوي أقصر عشان ما ياكل ربع الشاشة */
+    #navbar .h-20{height:3.25rem}
+    #navbar .w-12{width:2.25rem}#navbar .h-12{height:2.25rem}
+    #navbar .w-10{width:2rem}#navbar .h-10{height:2rem}
+    #navbar .text-2xl{font-size:1.1rem}
+    body main.pt-28{padding-top:4.25rem}
+    .scroll-mt-24,.scroll-mt-28{scroll-margin-top:4rem}
+    .menu-cats{top:52px}
+
+    /* الرئيسية */
+    .hero-video{height:100vh;min-height:0}
+    #home{gap:1rem;margin-bottom:2rem}
+    #home h1{font-size:1.75rem;line-height:1.25;margin-bottom:.5rem}
+    #home p.text-lg{font-size:.95rem;line-height:1.6;margin-bottom:1rem}
+    #home .glass-panel.p-8{padding:1rem}
+    #points-counter.points-number{font-size:2.75rem}
+    .o2-bottle{width:clamp(110px,32vh,160px)}
+
+    /* المكافآت والأدوات */
+    .reward-card .rw-art{height:6.5rem}
+    .reward-card .p-5{padding:.75rem}
+    .reward-card h3{font-size:1rem}
+    .rw-btn{min-height:36px;padding:.35rem .9rem}
+    .o2-tool{padding:var(--sp-3)}.o2-tool span{font-size:1.5rem}
+
+    /* الزجاجة المجتمعية */
+    .cb{gap:var(--sp-4);padding:var(--sp-4)}
+    .cb-bottle.o2-bottle{width:clamp(120px,40vh,200px)}
+    .cb-title{font-size:1.4rem}.cb-stats{margin:var(--sp-3) 0}
+
+    /* المودالات والنوافذ: لازم تتسع بارتفاع الشاشة وتتمرّر لو احتاجت */
+    #o2-modal .box,.wh-box,#redeemModal #modalContent,#cart-sheet,#globalMenuVideoModal>div{box-sizing:border-box}
+    #o2-modal,.wh-modal,#redeemModal,#globalMenuVideoModal{padding:.5rem max(.5rem,env(safe-area-inset-right,0px)) .5rem max(.5rem,env(safe-area-inset-left,0px))}
+    #o2-modal .box{max-height:calc(100dvh - 1rem);padding:var(--sp-4)}
+    .wh-box{max-height:calc(100dvh - 1rem);padding:var(--sp-3) var(--sp-4) var(--sp-4)}
+    .wh-stage{width:min(76vw,290px,46vh);margin:var(--sp-2) auto}
+    .sw-wrap{height:min(360px,56vh)}.sw-card img{height:min(190px,22vh)}
+    #cart-sheet{max-height:calc(100dvh - .5rem);width:min(100%,560px)}
+    #redeemModal #modalContent{max-height:calc(100dvh - 1rem);overflow-y:auto;padding:1rem}
+    #redeemModal #modalContent .mb-6{margin-bottom:.75rem}
+    #redeemModal #modalContent .w-20{width:3rem}#redeemModal #modalContent .h-20{height:3rem}
+    #globalMenuVideoModal>div{max-height:calc(100dvh - 1rem);overflow-y:auto}
+    #globalMenuVideoModal video{max-height:calc(100dvh - 1rem)}
+
+    /* البطاقة: مضغوطة عشان تتسع كلها بارتفاع الشاشة */
+    .gc-stage{padding:var(--sp-3) 0}
+    .gc-top{padding:.5rem var(--sp-4)}.gc-logo{width:34px;height:34px}
+    .gc-body{padding:.75rem var(--sp-4)}
+    .gc-hello{font-size:1.15rem}
+    .gc-text{font-size:1rem;line-height:1.6}
+    .gc-from,.gc-gift,.gc-note{margin-top:.5rem}
+    .gc-open{margin-top:.75rem}
+    .gc-acts{grid-template-columns:1fr 1fr;margin-top:.5rem}
+    .gc-claim,.gc-reply{min-height:40px}
+}
+/* شاشة أفقية عريضة بما يكفي: عمودين بالرئيسية وتلات كروت بالمكافآت */
+@media (orientation:landscape) and (max-height:500px) and (min-width:640px){
+    #home{grid-template-columns:repeat(12,minmax(0,1fr))}
+    #home>[class*="lg:col-span-5"]{grid-column:span 5 / span 5}
+    #home>[class*="lg:col-span-7"]{grid-column:span 7 / span 7}
+    #rewards .grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:.75rem}
+    .cb{grid-template-columns:auto 1fr}
+}
+/* الهواتف الأصغر (أقل من 768) بتضل معها الشريط السفلي: نخليه رفيع */
+@media (orientation:landscape) and (max-height:500px) and (max-width:767px){
+    .bottom-nav a{height:44px;flex-direction:row;gap:6px}
+    .bottom-nav a::after{bottom:3px}
+    body{padding-bottom:calc(44px + env(safe-area-inset-bottom,0px))}
+    #cart-fab{bottom:calc(52px + env(safe-area-inset-bottom,0px))}
+}
+
+/* ===== شاشات ضيقة: الشريط العلوي ما يطلع برا الشاشة ===== */
+@media (max-width:420px){
+    #navbar .text-2xl{font-size:1.15rem}
+    #navbar .w-12{width:2.5rem}#navbar .h-12{height:2.5rem}
+    #navbar .gap-4,#navbar .gap-3{gap:.5rem}
+}
+
+/* الزجاجة: سطح السائل (ob-tilt) أعرض من الزجاجة بـ 3 أضعاف عشان الميلان؛ الـ mask بيخبيه بصرياً بس ما بيقصّ المساحة،
+   فكان بيوسّع الصفحة أفقياً (خصوصاً زجاجة المجتمع). overflow:hidden يقصّه فعلياً. */
+.o2-bottle .ob-liquid{overflow:hidden}

@@ -11,16 +11,37 @@ window.o2VT = function (fn) {
 // ===== "ناقصك X نقطة" + شريط التقدم: بينحسبوا من رصيدك الحالي =====
 function o2UpdateLockMeters(points) {
     var fmt = function (n) { return Math.round(n).toLocaleString('en-US'); };
-    document.querySelectorAll('[data-lock-cost]').forEach(function (card) {
-        var cost = +card.dataset.lockCost, have = Math.max(0, points);
+    var have = Math.max(0, points);
+    document.querySelectorAll('[data-lock-cost]').forEach(function (meter) {
+        var cost = +meter.dataset.lockCost;
         var need = Math.max(0, cost - have), pct = Math.min(100, have / cost * 100);
-        var q = function (s) { return card.querySelector(s); };
+        var q = function (s) { return meter.querySelector(s); };
         q('[data-lock-need]').textContent = fmt(need);
         q('[data-lock-text]').textContent = fmt(Math.min(have, cost)) + ' / ' + fmt(cost);
         var bar = q('[data-lock-bar]'); bar.setAttribute('aria-valuenow', Math.round(have)); bar.setAttribute('aria-valuemax', cost);
         bar.querySelector('.meter-fill').style.setProperty('--p', pct + '%');
+        // locked until the balance reaches the cost, then the card turns back into a normal one
+        var card = meter.closest('.reward-card');
+        if (card) {
+            var locked = have < cost;
+            card.classList.toggle('is-locked', locked);
+            var btn = card.querySelector('.rw-btn'); if (btn) btn.disabled = locked;
+        }
     });
 }
+
+// Keep the cards in sync with the real balance whenever the points counter settles (earn / spend / wheel / saved balance)
+(function () {
+    var el = document.getElementById('points-counter'); if (!el) return;
+    var t;
+    new MutationObserver(function () {
+        clearTimeout(t);
+        t = setTimeout(function () {
+            var v = (window.O2Loyalty && typeof O2Loyalty.balance === 'function') ? O2Loyalty.balance() : parseInt(el.textContent.replace(/[^\d]/g, ''), 10);
+            if (!isNaN(v)) o2UpdateLockMeters(v);
+        }, 350);
+    }).observe(el, { childList: true, characterData: true, subtree: true });
+})();
 
 
 
@@ -204,7 +225,7 @@ function forceCloseGlobalModal() {
             }
             function onOrient(e) {
                 if (e.gamma == null) return;
-                const o = orient(); if (o !== 0 && o !== 180) return;                    // portrait only
+                const o = orient(); if (o !== 0 && o !== 180) { target = 0; wake(); return; }   // أفقي: سطح السائل بيرجع مستوي (ما بيضل عالق بزاوية قديمة)
                 sensor = true; target = -clamp(o === 180 ? -e.gamma : e.gamma, 40) * .9; wake();
             }
             function onMotion(e) {                                                       // a shake adds a splash
@@ -571,7 +592,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
                 function updateItemsVisibility() {
                     cards.forEach((card, index) => {
                         if (index < 3 || isExpanded) {
-                            card.style.display = 'block';
+                            card.style.display = '';
                         } else {
                             card.style.display = 'none';
                         }
@@ -594,12 +615,12 @@ window.addEventListener('beforeinstallprompt', (e) => {
                         const btnIcon = this.querySelector('.btn-icon');
 
                         if (isExpanded) {
-                            cards.forEach(card => card.style.display = 'block');
+                            cards.forEach(card => card.style.display = '');
                             if (btnText) btnText.textContent = 'عرض أقل';
                             if (btnIcon) btnIcon.style.transform = 'rotate(180deg)';
                         } else {
                             cards.forEach((card, index) => {
-                                card.style.display = index < 3 ? 'block' : 'none';
+                                card.style.display = index < 3 ? '' : 'none';
                             });
                             if (btnText) btnText.textContent = 'عرض المزيد من الأصناف';
                             if (btnIcon) btnIcon.style.transform = 'rotate(0deg)';
@@ -635,7 +656,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
                                 const ingredients = card.querySelector('.meal-ingredients')?.textContent.toLowerCase() || '';
 
                                 if (title.includes(query) || ingredients.includes(query)) {
-                                    card.style.display = 'block';
+                                    card.style.display = '';
                                     sectionMatches++;
                                     totalMatches++;
                                 } else {
@@ -664,7 +685,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
                             
                             // إعادة تعيين العرض لأول 3 عناصر (إلا قسم الكاروسيل)
                             cards.forEach((card, index) => {
-                                card.style.display = (isCarousel || index < 3) ? 'block' : 'none';
+                                card.style.display = (isCarousel || index < 3) ? '' : 'none';
                             });
 
                             if (showMoreWrapper) {
@@ -882,209 +903,6 @@ window.addEventListener('beforeinstallprompt', (e) => {
         function closeM() { M.classList.remove('open'); document.documentElement.style.overflow = ''; }
         M.addEventListener('click', function (e) { if (e.target === M) closeM(); });
 
-        // ---- 3D burger (Three.js loads on demand; falls back to the 2D stack if it can't) ----
-        var T3 = null;
-        function loadThree() {
-            if (window.THREE) return Promise.resolve();
-            if (T3) return T3;
-            T3 = new Promise(function (res, rej) {
-                var sc = document.createElement('script');
-                sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
-                sc.onload = res; sc.onerror = function () { T3 = null; rej(new Error('three.js')); };
-                document.head.appendChild(sc);
-            });
-            return T3;
-        }
-        function make3D(host) {
-            var W = Math.max(260, host.clientWidth || 380), H = 300;
-            var scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(34, W / H, .1, 100);
-            var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2)); renderer.setSize(W, H);
-            var canvas = renderer.domElement;
-            scene.add(new THREE.HemisphereLight(0xffffff, 0x553322, .95));
-            var sun = new THREE.DirectionalLight(0xffffff, .95); sun.position.set(3, 6, 4); scene.add(sun);
-            var rimL = new THREE.DirectionalLight(0xff5555, .45); rimL.position.set(-4, 2, -3); scene.add(rimL);
-            var world = new THREE.Group(); scene.add(world);
-
-            function mat(c, r, m) { return new THREE.MeshStandardMaterial({ color: c, roughness: r == null ? .7 : r, metalness: m || 0, side: THREE.DoubleSide }); }
-            function lathe(pts, c, r) { return new THREE.Mesh(new THREE.LatheGeometry(pts.map(function (p) { return new THREE.Vector2(p[0], p[1]); }), 48), mat(c, r)); }
-            function wobble(geo, amp, ph, bump) {      // organic, uneven edge
-                var pos = geo.attributes.position;
-                for (var i = 0; i < pos.count; i++) {
-                    var x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i), a = Math.atan2(z, x);
-                    var f = 1 + amp * (Math.sin(3 * a + ph) * .7 + Math.sin(7 * a + ph * 2) * .3);
-                    pos.setXYZ(i, x * f, y + (bump ? bump * Math.sin(x * 8) * Math.sin(z * 8) : 0), z * f);
-                }
-                geo.computeVertexNormals(); return geo;
-            }
-            var plate = new THREE.Mesh(new THREE.CylinderGeometry(1.75, 1.6, .08, 56), mat(0x2a2a2a, .35, .4)); plate.position.y = -.04; world.add(plate);
-
-            // ---- buns ----
-            function botBun() { var g = new THREE.Group(); g.add(lathe([[0, 0], [.95, 0], [1.08, .06], [1.13, .17], [1.1, .3], [0, .3]], 0xd98c2b, .8)); return { g: g, h: .3 }; }
-            function topBun() {
-                var g = new THREE.Group(), R = 1.15, K = .85;
-                var lip = lathe([[0, 0], [1.12, 0], [1.16, .05], [1.14, .12], [0, .12]], 0xd98c2b, .8); g.add(lip);
-                var dome = new THREE.Mesh(new THREE.SphereGeometry(R, 48, 24, 0, Math.PI * 2, 0, Math.PI / 2), mat(0xd98c2b, .75));
-                dome.scale.y = K; dome.position.y = .1; g.add(dome);
-                var sg = new THREE.SphereGeometry(.05, 8, 6), sm = mat(0xf6e7c1, .6), up = new THREE.Vector3(0, 1, 0);
-                for (var i = 0; i < 34; i++) {
-                    var t = Math.acos(1 - Math.random() * .62), p = Math.random() * Math.PI * 2;
-                    var x = R * Math.sin(t) * Math.cos(p), y = R * K * Math.cos(t), z = R * Math.sin(t) * Math.sin(p);
-                    var n = new THREE.Vector3(x / (R * R), y / (R * K * R * K), z / (R * R)).normalize();
-                    var sd = new THREE.Mesh(sg, sm); sd.scale.set(1.5, .55, 1);
-                    sd.position.set(x * 1.005, y * 1.005 + .1, z * 1.005);
-                    sd.quaternion.setFromUnitVectors(up, n); g.add(sd);
-                }
-                return { g: g, h: 1.08 };
-            }
-
-            // ---- fillings (every builder returns a group whose base sits at y = 0) ----
-            var LAYERS = {
-                beef: function () {
-                    var g = new THREE.Group(); g.add(lathe([[0, 0], [.97, 0], [1.03, .05], [1.04, .14], [1.02, .22], [.95, .26], [0, .26]], 0x5d3a1a, .9));
-                    var gm = mat(0x2b190c, 1), marks = new THREE.Group();
-                    [-.4, 0, .4].forEach(function (d) { var b = new THREE.Mesh(new THREE.BoxGeometry(1.5, .01, .07), gm); b.position.set(0, .262, d); marks.add(b); });
-                    marks.rotation.y = .6; g.add(marks); return { g: g, h: .26 };
-                },
-                chicken: function () {
-                    var g = new THREE.Group(), m = new THREE.Mesh(wobble(new THREE.CylinderGeometry(1, 1, .24, 56, 3), .05, 2, .02), mat(0xe0a83c, .95));
-                    m.position.y = .12; g.add(m); return { g: g, h: .24 };
-                },
-                cheese: function () {
-                    var g = new THREE.Group(), geo = new THREE.PlaneGeometry(2.1, 2.1, 10, 10); geo.rotateX(-Math.PI / 2);
-                    var pos = geo.attributes.position;
-                    for (var i = 0; i < pos.count; i++) { var x = pos.getX(i), z = pos.getZ(i), r = Math.sqrt(x * x + z * z); pos.setY(i, -Math.pow(Math.max(0, r - 1), 1.5) * .9); }
-                    geo.computeVertexNormals();
-                    var m = new THREE.Mesh(geo, mat(0xffc107, .4)); m.position.y = .05; g.add(m); g.rotation.y = .5; return { g: g, h: .05 };
-                },
-                lettuce: function () {
-                    var g = new THREE.Group(), geo = new THREE.RingGeometry(.05, 1.2, 64, 8); geo.rotateX(-Math.PI / 2);
-                    var pos = geo.attributes.position;
-                    for (var i = 0; i < pos.count; i++) {
-                        var x = pos.getX(i), z = pos.getZ(i), r = Math.sqrt(x * x + z * z), a = Math.atan2(z, x), f = 1 + .04 * Math.sin(a * 7);
-                        pos.setXYZ(i, x * f, .05 + Math.sin(a * 9) * Math.max(0, r - .55) * .1, z * f);
-                    }
-                    geo.computeVertexNormals(); g.add(new THREE.Mesh(geo, mat(0x5cb85c, .6))); return { g: g, h: .08 };
-                },
-                tomato: function () { var g = new THREE.Group(); g.add(lathe([[0, 0], [.93, 0], [.97, .03], [.97, .07], [.93, .1], [0, .1]], 0xe53935, .35)); return { g: g, h: .1 }; },
-                onion: function () {
-                    var g = new THREE.Group(), m = mat(0xe9d8f5, .5);
-                    [.5, .75, .98].forEach(function (r) {
-                        var t = new THREE.Mesh(new THREE.TorusGeometry(r, .04, 8, 40, 3.8 + Math.random() * 2.2), m); t.rotation.x = Math.PI / 2;
-                        var pv = new THREE.Group(); pv.add(t); pv.rotation.y = Math.random() * 6.28; pv.position.y = .04; g.add(pv);
-                    });
-                    return { g: g, h: .07 };
-                },
-                pickle: function () {
-                    var g = new THREE.Group(), m = mat(0x7cb342, .5), geo = new THREE.CylinderGeometry(.3, .3, .07, 24);
-                    for (var i = 0; i < 6; i++) { var d = new THREE.Mesh(geo, m), rr = i ? .62 : 0; d.position.set(Math.cos(i * 1.2566) * rr, .035, Math.sin(i * 1.2566) * rr); g.add(d); }
-                    return { g: g, h: .07 };
-                },
-                sauce: function () {
-                    var g = new THREE.Group(), m = new THREE.Mesh(wobble(new THREE.CylinderGeometry(.88, .88, .05, 48, 1), .14, 1.3), mat(0xff7043, .25));
-                    m.position.y = .025; g.add(m); return { g: g, h: .05 };
-                }
-            };
-
-            var bunBot = botBun(), bunTop = topBun(), items = [], keys = [];
-            world.add(bunBot.g); world.add(bunTop.g);
-            var camY = 1, camYT = 1, dist = 6.5, distT = 6.5, rotY = .6, vel = 0, drag = false, lastX = 0, raf = 0, dead = false;
-
-            function layout(snap, off) {
-                var y = bunBot.h;
-                items.forEach(function (it) {
-                    it.ty = y;
-                    if (it.isNew) { it.g.position.y = y + (off || 0); it.isNew = false; } else if (snap) it.g.position.y = y;
-                    y += it.h;
-                });
-                bunTop.ty = y; if (snap) bunTop.g.position.y = y;
-                var total = y + bunTop.h; camYT = total / 2 + .2; distT = Math.max(6.4, total * 1.55 + 4.2);
-                if (snap) { camY = camYT; dist = distT; }
-            }
-            function dispose(o) { o.traverse(function (c) { if (c.geometry) c.geometry.dispose(); if (c.material) c.material.dispose(); }); }
-            function set(Ln, fresh) {
-                var i = 0; while (i < keys.length && i < Ln.length && keys[i] === Ln[i]) i++;
-                while (items.length > i) { var old = items.pop(); world.remove(old.g); dispose(old.g); }
-                for (; i < Ln.length; i++) { var b = LAYERS[Ln[i]](); b.isNew = true; world.add(b.g); items.push(b); }
-                keys = Ln.slice(); layout(!fresh, fresh ? 2.6 : 0);
-            }
-            function destroy() { if (dead) return; dead = true; cancelAnimationFrame(raf); dispose(scene); renderer.dispose(); }
-            function frame() {
-                if (dead) return;
-                if (!canvas.isConnected || !M.classList.contains('open')) { destroy(); return; }
-                raf = requestAnimationFrame(frame);
-                if (!drag) { vel *= .94; rotY += vel + .006; }
-                world.rotation.y = rotY;
-                items.forEach(function (it) { it.g.position.y += (it.ty - it.g.position.y) * .2; });
-                bunTop.g.position.y += (bunTop.ty - bunTop.g.position.y) * .2;
-                camY += (camYT - camY) * .08; dist += (distT - dist) * .08;
-                cam.position.set(0, camY + 1.5 + dist * .12, dist); cam.lookAt(0, camY, 0);
-                renderer.render(scene, cam);
-            }
-            canvas.style.touchAction = 'pan-y';
-            canvas.addEventListener('pointerdown', function (e) { drag = true; lastX = e.clientX; vel = 0; try { canvas.setPointerCapture(e.pointerId); } catch (x) {} });
-            canvas.addEventListener('pointermove', function (e) { if (!drag) return; var dx = e.clientX - lastX; lastX = e.clientX; rotY += dx * .012; vel = dx * .012; });
-            ['pointerup', 'pointercancel'].forEach(function (n) { canvas.addEventListener(n, function () { drag = false; }); });
-
-            host.innerHTML = ''; host.classList.add('bb-stack3d'); host.appendChild(canvas);
-            host.insertAdjacentHTML('afterend', '<div class="bb-hint">↔ اسحب لتدوير البرجر</div>');
-            raf = requestAnimationFrame(frame);
-            return { set: set };
-        }
-
-        // ---- burger builder ----
-        // [المفتاح، الاسم، الإيموجي، السعر، الحد الأقصى لكل مكوّن]
-        var ING = [['beef', 'لحمة', '🥩', 12, 2], ['chicken', 'كرسبي', '🍗', 10, 2], ['cheese', 'جبنة', '🧀', 3, 3], ['lettuce', 'خس', '🥬', 1, 2], ['tomato', 'بندورة', '🍅', 1, 2], ['onion', 'بصل', '🧅', 1, 2], ['pickle', 'مخلل', '🥒', 1, 2], ['sauce', 'صوص', '🥫', 1, 2]], BASE = 10, MAX = 10,
-            GROUPS = [{ keys: ['beef', 'chicken'], max: 2, name: 'اللحمة والكرسبي' }];   // حد مشترك بين أكثر من مكوّن
-        function openBurger() {
-            var L = ['beef'], stack3d = null;
-            openM('<h3 class="text-xl font-black text-center">ابنِ برجرك 🍔</h3><div class="bb-stack" id="bb-stack"></div><div class="text-center font-black text-xl"><span id="bb-p"></span> <span class="text-sm text-yellow-400" id="bb-pts"></span></div><div class="bb-msg" id="bb-msg"></div><div class="bb-ing my-3" id="bb-ing">' + ING.map(function (g) { return '<button data-k="' + g[0] + '">' + g[2] + ' ' + g[1] + ' +' + g[3] + '₪ <em class="bb-c"></em></button>'; }).join('') + '</div><div class="flex gap-2"><button id="bb-undo" class="flex-1 py-3 rounded-xl bg-surface-3 font-bold">تراجع ↩</button><button id="bb-add" class="flex-1 py-3 rounded-xl bg-o2-red font-black">أضف للسلة</button></div>');
-            function price() { return BASE + L.reduce(function (s, k) { return s + ING.filter(function (g) { return g[0] === k; })[0][3]; }, 0); }
-            function draw(fresh) {
-                var s = $('#bb-stack'); if (stack3d) stack3d.set(L, fresh === true); else s.innerHTML = '<div class="bb-top ' + (fresh === 'top' ? 'bb-new' : '') + '"></div>' + L.slice().reverse().map(function (k, i) { return '<div class="bb-' + k + (fresh && i === 0 ? ' bb-new' : '') + '"></div>'; }).join('') + '<div class="bb-bot"></div>';
-                $('#bb-p').textContent = price() + ' ₪'; $('#bb-pts').textContent = '★ ' + O2cart.pts(price()) + ' نقطة'; sync();
-            }
-            function cnt(k) { return L.filter(function (x) { return x === k; }).length; }
-            function grpOf(k) { return GROUPS.filter(function (x) { return x.keys.indexOf(k) > -1; })[0]; }
-            function grpCnt(gp) { return L.filter(function (x) { return gp.keys.indexOf(x) > -1; }).length; }
-            function grpFull(k) { var gp = grpOf(k); return !!gp && grpCnt(gp) >= gp.max; }
-            function ingOf(k) { return ING.filter(function (g) { return g[0] === k; })[0]; }
-            var mt;
-            function msg(t, el) {
-                var m = $('#bb-msg'); m.textContent = t; clearTimeout(mt);
-                if (t) mt = setTimeout(function () { m.textContent = ''; }, 2200);
-                if (el) { el.classList.remove('bb-shake'); void el.offsetWidth; el.classList.add('bb-shake'); }
-            }
-            function sync() {
-                ING.forEach(function (g) {
-                    var b = $('#bb-ing [data-k="' + g[0] + '"]'), n = cnt(g[0]);
-                    $('.bb-c', b).textContent = n + '/' + g[4];
-                    b.classList.toggle('maxed', n >= g[4] || L.length >= MAX || grpFull(g[0]));
-                });
-                $('#bb-undo').disabled = L.length <= 1;
-            }
-            draw('top');
-            loadThree().then(function () {
-                if (!M.classList.contains('open') || !$('#bb-stack')) return;
-                try { stack3d = make3D($('#bb-stack')); draw(); } catch (err) { stack3d = null; var h = $('#bb-stack'); h.classList.remove('bb-stack3d'); console.warn('3D burger unavailable, using 2D', err); draw(); }
-            }).catch(function () {});
-            $('#bb-ing').onclick = function (e) {
-                var b = e.target.closest('button'); if (!b) return; var k = b.dataset.k, g = ingOf(k);
-                if (L.length >= MAX) { vib(8); return msg('وصل البرجر لأقصى ارتفاع (' + MAX + ' طبقات) 🍔', b); }
-                if (grpFull(k)) { var gp = grpOf(k); vib(8); return msg('الحد الأقصى من ' + gp.name + ' مع بعض هو ' + gp.max + ' فقط', b); }
-                if (cnt(k) >= g[4]) { vib(8); return msg('الحد الأقصى من ' + g[1] + ' هو ' + g[4] + ' فقط', b); }
-                L.push(k); vib(); msg(''); draw(true);
-            };
-            $('#bb-undo').onclick = function () { if (L.length > 1) { L.pop(); draw(); } };
-            $('#bb-add').onclick = function (e) {
-                var n = {}; L.forEach(function (k) { n[k] = (n[k] || 0) + 1; });
-                var nm = 'برجر مخصص (' + ING.filter(function (g) { return n[g[0]]; }).map(function (g) { return g[1] + (n[g[0]] > 1 ? '×' + n[g[0]] : ''); }).join('، ') + ')';
-                O2cart.add(nm, price()); confetti(e.clientX, e.clientY); vib([20, 30, 20]); closeM();
-            };
-        }
-        $('#open-burger').onclick = openBurger;
-        ['pointerenter', 'touchstart'].forEach(function (ev) { $('#open-burger').addEventListener(ev, function () { loadThree().catch(function () {}); }, { once: true, passive: true }); });
-
         // ---- what should I eat (swipe): see swipe.js ----
         window.O2UI = { $: $, openM: openM, closeM: closeM, vib: vib, confetti: confetti };
         $('#open-swipe').onclick = function () { window.O2Swipe && O2Swipe.open(); };
@@ -1282,4 +1100,263 @@ window.addEventListener('beforeinstallprompt', (e) => {
         if (mobileMQ.addEventListener) mobileMQ.addEventListener('change', request3D);
         apply3D();
     });
+})();
+
+
+// ===== الزجاجة المجتمعية (وجبة معلّقة) + بطاقة من O2 =====
+// ملاحظة: لسا ما في قاعدة بيانات، فالأرقام محفوظة بمتصفح الزبون (localStorage).
+// لما تنبني القاعدة: بدّل Community.read / Community.donate (تحت) بطلبات API، وخلّي الهدية بالرسالة تنفتح بتوكن موقّع من السيرفر.
+(function () {
+    'use strict';
+    var $ = function (s, r) { return (r || document).querySelector(s); };
+    var fmt = function (n) { return Math.round(n).toLocaleString('en-US'); };
+    var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var store = {
+        get: function (k, d) { try { var v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } },
+        set: function (k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+    };
+    var toastT;
+    function toast(m) { var t = document.getElementById('o2-toast'); if (!t) return; t.textContent = m; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(function () { t.classList.remove('show'); }, 2200); }
+    function vib(n) { try { navigator.vibrate && navigator.vibrate(n || 15); } catch (e) {} }
+    function sound(n) { try { window.O2Sound && O2Sound.play(n); } catch (e) {} }
+    function confetti(x, y) { try { window.O2UI && O2UI.confetti(x, y); } catch (e) {} }
+
+    // ---- النقاط: بنستخدم نظام الولاء الموجود، وإذا مش موجود بنعدّل العدّاد مباشرة ----
+    function balance() {
+        if (window.O2Loyalty && typeof O2Loyalty.balance === 'function') return O2Loyalty.balance();
+        var c = document.getElementById('points-counter');
+        return c ? (parseInt(c.textContent.replace(/[^\d]/g, ''), 10) || 0) : 0;
+    }
+    function shift(delta) {   // احتياطي بدون O2Loyalty
+        var c = document.getElementById('points-counter'); if (!c) return;
+        var cur = balance();
+        try { animateValue(c, cur, cur + delta, 1000); o2UpdateLockMeters(cur + delta); animateProgressBar(cur + delta, maxTierPoints); } catch (e) { c.textContent = fmt(cur + delta); }
+    }
+    function spend(n, label) { if (window.O2Loyalty && typeof O2Loyalty.spend === 'function') O2Loyalty.spend(n, label); else shift(-n); }
+    function earn(n, label) { if (window.O2Loyalty && typeof O2Loyalty.earn === 'function') O2Loyalty.earn(n, label); else shift(n); }
+
+    function tween(el, from, to, ms, f) {
+        if (!el) return;
+        if (reduce || from === to) { el.textContent = f(to); return; }
+        var t0 = performance.now();
+        (function step(now) {
+            var k = Math.min((now - t0) / ms, 1), e = 1 - Math.pow(1 - k, 4);
+            el.textContent = f(from + (to - from) * e);
+            if (k < 1) requestAnimationFrame(step);
+        })(t0);
+    }
+
+    /* ================= 1) الزجاجة المجتمعية ================= */
+    var cm = $('#community');
+    if (cm) (function () {
+        var MEAL = 500, CAP = 10000, SEED = 6200, KEY = 'o2.community.v1';   // SEED = رقم تجريبي ابتدائي لحد ما تنبني القاعدة
+        var Community = {
+            read: function () { var d = store.get(KEY, null); if (!d) { d = { total: SEED, mine: 0, last: null }; store.set(KEY, d); } return d; },
+            donate: function (pts) { var d = this.read(); d.total += pts; d.mine += pts; d.last = { pts: pts, t: Date.now() }; store.set(KEY, d); return d; }
+        };
+        var bottle = $('#cb-bottle'), fill = $('#cb-fill'), pctEl = $('#cb-pct'), mealsEl = $('#cb-meals'), curEl = $('#cb-cur'), mineEl = $('#cb-mine'),
+            giveBtn = $('#cb-give'), amtEl = $('#cb-amt'), msgEl = $('#cb-msg'), winEl = $('#cb-win'), lastEl = $('#cb-last');
+        var chosen = 100, level = 0, mealsShown = 0, curShown = 0, mineShown = 0;
+        $('#cb-cap').textContent = fmt(CAP);
+
+        function pctOf(t) { return (t % CAP) / CAP * 100; }
+        function setLevel(p) {
+            bottle.classList.toggle('empty', p <= 0.5);
+            fill.style.height = p + '%';
+            tween(pctEl, level, p, 1600, function (v) { return Math.round(v); });
+            level = p;
+        }
+        function ago(ts) {
+            var m = Math.floor((Date.now() - ts) / 60000);
+            return m < 1 ? 'هلأ' : m < 60 ? 'قبل ' + m + ' دقيقة' : m < 1440 ? 'قبل ' + Math.floor(m / 60) + ' ساعة' : 'قبل ' + Math.floor(m / 1440) + ' يوم';
+        }
+        function stats(d, keepCur) {
+            var meals = Math.floor(d.total / MEAL), cur = d.total % CAP;
+            tween(mealsEl, mealsShown, meals, 1200, fmt); mealsShown = meals;
+            if (!keepCur) { tween(curEl, curShown, cur, 1200, fmt); curShown = cur; }
+            tween(mineEl, mineShown, d.mine, 1200, fmt); mineShown = d.mine;
+            if (d.last) { lastEl.hidden = false; lastEl.textContent = 'آخر تبرّع منك: ' + fmt(d.last.pts) + ' نقطة · ' + ago(d.last.t); }
+        }
+        function say(t, err) { msgEl.textContent = t; msgEl.classList.toggle('err', !!err); }
+
+        // أول ما القسم يظهر عالشاشة، الزجاجة بتمتلي من الصفر للمستوى الحالي
+        var first = Community.read();
+        function reveal() { stats(first); setLevel(pctOf(first.total)); }
+        if ('IntersectionObserver' in window) {
+            var io = new IntersectionObserver(function (es) { if (es[0].isIntersecting) { io.disconnect(); reveal(); } }, { threshold: .25 });
+            io.observe(cm);
+        } else reveal();
+
+        var chips = [].slice.call(document.querySelectorAll('.cb-chip'));
+        chips.forEach(function (c) {
+            c.addEventListener('click', function () {
+                chosen = +c.dataset.v;
+                chips.forEach(function (x) { x.setAttribute('aria-pressed', x === c ? 'true' : 'false'); });
+                amtEl.textContent = fmt(chosen); say(''); vib(8);
+            });
+        });
+
+        giveBtn.addEventListener('click', function (e) {
+            if (balance() < chosen) { say('رصيدك ما بيكفي لهالمبلغ — جرّب مبلغ أقل', true); vib([10, 40, 10]); return; }
+            spend(chosen, 'تبرّع للزجاجة المجتمعية');
+            var before = Community.read().total, d = Community.donate(chosen);
+            var filled = Math.floor(d.total / CAP) > Math.floor(before / CAP);
+            vib([15, 30, 15]); sound('win'); confetti(e.clientX, e.clientY);
+            if (filled) {
+                setLevel(100); bottle.classList.add('celebrate'); stats(d, true);
+                winEl.textContent = '🎉 امتلأت الزجاجة! O2 رح تجهّز وتوزّع ' + (CAP / MEAL) + ' وجبة مجانية';
+                winEl.classList.add('show');
+                setTimeout(function () { bottle.classList.remove('celebrate'); var now = Community.read(); setLevel(pctOf(now.total)); stats(now); }, 2800);   // نقرأ الرقم الحالي مش القديم، لو حدا تبرّع وقت الاحتفال
+                setTimeout(function () { winEl.classList.remove('show'); }, 8000);
+            } else { setLevel(pctOf(d.total)); stats(d); }
+            say('شكرًا إلك 💛 ضفت ' + fmt(chosen) + ' نقطة للزجاجة');
+        });
+    })();
+
+    /* ================= 2) بطاقة من O2 (كلمة حلوة + هدية نقاط لصاحبك) ================= */
+    var GIFTS = [0, 25, 50, 100], DAILY_CAP = 3;
+
+    function enc(o) {
+        var b = new TextEncoder().encode(JSON.stringify(o)), s = '';
+        b.forEach(function (x) { s += String.fromCharCode(x); });
+        return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    }
+    function dec(t) {
+        t = t.replace(/-/g, '+').replace(/_/g, '/'); while (t.length % 4) t += '=';
+        var s = atob(t), a = new Uint8Array(s.length);
+        for (var i = 0; i < s.length; i++) a[i] = s.charCodeAt(i);
+        return JSON.parse(new TextDecoder().decode(a));
+    }
+    function readHash() {
+        var m = /^#card=([A-Za-z0-9_-]{8,1500})$/.exec(location.hash); if (!m) return null;
+        var o; try { o = dec(m[1]); } catch (e) { return null; }
+        if (!o || typeof o.m !== 'string' || !o.m.trim()) return null;
+        var g = +o.g; if (GIFTS.indexOf(g) < 0) g = 0;
+        return { id: String(o.i || '').replace(/[^a-z0-9]/gi, '').slice(0, 12) || 'x', m: o.m.slice(0, 140), f: String(o.f || '').slice(0, 24), t: String(o.t || '').slice(0, 24), g: g };
+    }
+
+    // ---- شكل البطاقة (كل النصوص بتنحط بـ textContent، يعني ما في خطر كود مزروع بالرابط) ----
+    function node(tag, cls, text) { var n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; }
+    function cardShell() {
+        var card = node('div', 'gc-card'), top = node('div', 'gc-top'), logo = node('span', 'gc-logo');
+        var img = node('img'); img.src = 'o2.png'; img.alt = ''; img.onerror = function () { img.remove(); logo.textContent = 'O2'; };
+        logo.appendChild(img);
+        var brand = node('span', 'gc-brand'); brand.appendChild(document.createTextNode('O')); brand.appendChild(node('span', null, '2')); brand.appendChild(document.createTextNode(' REWARDS'));
+        top.appendChild(logo); top.appendChild(brand);
+        var body = node('div', 'gc-body'); card.appendChild(top); card.appendChild(body);
+        return { card: card, body: body };
+    }
+    function fillMessage(body, b) {
+        body.textContent = '';
+        if (b.t) body.appendChild(node('p', 'gc-to', 'إلى ' + b.t + '،'));
+        body.appendChild(node('p', 'gc-text', b.m));
+        body.appendChild(node('p', 'gc-from', b.f ? '— ' + b.f : '— من صديق إلك 💛'));
+        if (b.g) body.appendChild(node('span', 'gc-gift', '🎁 هدية: ' + b.g + ' نقطة'));
+    }
+
+    // ---- المُرسِل ----
+    function openSend() {
+        if (!window.O2UI) return;
+        var gift = 0;
+        O2UI.openM('<h3 class="text-xl font-black text-center">ابعت بطاقة لصاحبك 💌</h3>' +
+            '<p class="bm-sub">اكتب كلمة حلوة وبنجهّزها بطاقة من O2، وبتوصل لصاحبك برابط واتساب.</p>' +
+            '<label class="bm-lbl">لمين؟ <small>(اختياري)</small><input id="bm-to" class="bm-in" maxlength="24" placeholder="اسم صاحبك" autocomplete="off"></label>' +
+            '<label class="bm-lbl">رسالتك<textarea id="bm-msg" class="bm-in" rows="3" maxlength="140" placeholder="اكتب رسالتك هون..."></textarea><span class="bm-count"><b id="bm-n">0</b>/140</span></label>' +
+            '<label class="bm-lbl">من؟ <small>(اختياري)</small><input id="bm-from" class="bm-in" maxlength="24" placeholder="اسمك" autocomplete="off"></label>' +
+            '<div class="bm-lbl">هدية نقاط <small>(بتنخصم من رصيدك)</small></div>' +
+            '<div class="bm-gifts" id="bm-gifts">' + GIFTS.map(function (g) { return '<button type="button" data-g="' + g + '" aria-pressed="' + (g === 0) + '">' + (g ? '+' + g + ' نقطة' : 'بدون هدية') + '</button>'; }).join('') + '</div>' +
+            '<div class="bm-err" id="bm-err" aria-live="polite"></div>' +
+            '<button type="button" class="bm-go" id="bm-go">جهّز البطاقة 💌</button>');
+        var msgIn = $('#bm-msg'), nEl = $('#bm-n'), go = $('#bm-go'), err = $('#bm-err');
+        msgIn.addEventListener('input', function () { nEl.textContent = msgIn.value.length; err.textContent = ''; });
+        var gbs = [].slice.call(document.querySelectorAll('#bm-gifts button'));
+        gbs.forEach(function (b) {
+            b.addEventListener('click', function () {
+                gift = +b.dataset.g; err.textContent = '';
+                gbs.forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+                go.textContent = gift ? 'جهّز البطاقة (−' + gift + ' نقطة) 💌' : 'جهّز البطاقة 💌'; vib(8);
+            });
+        });
+        go.addEventListener('click', function () {
+            var m = msgIn.value.trim().replace(/\s+/g, ' ');
+            if (m.length < 3) { err.textContent = 'اكتب رسالة (3 أحرف عالأقل)'; return; }
+            if (gift > balance()) { err.textContent = 'رصيدك ما بيكفي لهالهدية'; return; }
+            var o = { i: Math.random().toString(36).slice(2, 10), m: m.slice(0, 140), f: $('#bm-from').value.trim().slice(0, 24), t: $('#bm-to').value.trim().slice(0, 24), g: gift };
+            if (gift) spend(gift, 'هدية بطاقة O2');
+            showResult(location.href.split('#')[0] + '#card=' + enc(o), o);
+        });
+    }
+    function showResult(link, o) {
+        var text = '💌 وصلتك بطاقة من O2!\nافتحها من هون: ' + link;
+        O2UI.openM('<div class="bm-done"><h3>البطاقة جاهزة ✨</h3><div id="gc-prev" class="gc-prev"></div>' +
+            '<p>ابعتها لصاحبك، وهيك بتظهر إله لما يفتح الرابط.' + (o.g ? '<br>هديتك (' + o.g + ' نقطة) بتنتقل إله لما يفتحها.' : '') + '</p>' +
+            '<a class="bm-wa" target="_blank" rel="noopener" href="https://wa.me/?text=' + encodeURIComponent(text) + '">ابعتها عبر واتساب</a>' +
+            '<button type="button" class="bm-copy" id="bm-copy">نسخ الرابط</button></div>');
+        var s = cardShell(); fillMessage(s.body, o); $('#gc-prev').appendChild(s.card);
+        vib([15, 30, 15]); sound('win');
+        $('#bm-copy').addEventListener('click', function () {
+            var done = function () { toast('انسخ الرابط ✓'); };
+            if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(link).then(done, function () { window.prompt('انسخ الرابط:', link); });
+            else window.prompt('انسخ الرابط:', link);
+        });
+    }
+
+    // ---- المستقبِل ----
+    var viewOpen = false;
+    function showCard(b) {
+        if (viewOpen) return; viewOpen = true;
+        var view = node('div', 'gc-view'), stage = node('div', 'gc-stage'), shell = cardShell();
+        view.setAttribute('role', 'dialog'); view.setAttribute('aria-modal', 'true'); view.setAttribute('aria-label', 'بطاقة من O2'); view.setAttribute('data-lenis-prevent', '');
+        var x = node('button', 'gc-x', '×'); x.type = 'button'; x.setAttribute('aria-label', 'إغلاق');
+        view.appendChild(x); stage.appendChild(shell.card); view.appendChild(stage); document.body.appendChild(view);
+        var prevOverflow = document.documentElement.style.overflow;
+        document.documentElement.style.overflow = 'hidden';
+        function close() {
+            view.remove(); viewOpen = false; document.documentElement.style.overflow = prevOverflow;
+            document.removeEventListener('keydown', onKey);
+            try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
+        }
+        function onKey(e) { if (e.key === 'Escape') close(); }
+        document.addEventListener('keydown', onKey); x.addEventListener('click', close);
+
+        // الحالة المغلقة
+        shell.body.appendChild(node('p', 'gc-hello', b.f ? 'وصلتك بطاقة من ' + b.f + ' 💌' : 'وصلتك بطاقة 💌'));
+        shell.body.appendChild(node('p', 'gc-tip', b.g ? 'وفيها هدية نقاط 🎁' : 'كلمة حلوة من صاحبك'));
+        var openBtn = node('button', 'gc-open', 'افتح البطاقة'); openBtn.type = 'button'; shell.body.appendChild(openBtn); openBtn.focus();
+
+        openBtn.addEventListener('click', function (e) {
+            fillMessage(shell.body, b); shell.card.classList.add('is-open');
+            var note = node('p', 'gc-note'); note.setAttribute('aria-live', 'polite');
+            var acts = node('div', 'gc-acts'), claim = node('button', 'gc-claim'); claim.type = 'button'; claim.hidden = true;
+            var reply = node('button', 'gc-reply', 'ابعت بطاقة ردّ 💌'); reply.type = 'button';
+            acts.appendChild(claim); acts.appendChild(reply); shell.body.appendChild(note); shell.body.appendChild(acts);
+            vib([20, 40, 20]); sound('win'); confetti(e.clientX, e.clientY);
+            if (b.g) {
+                var claimed = store.get('o2.cards.claimed', []), day = new Date().toISOString().slice(0, 10), dd = store.get('o2.cards.day', { d: day, n: 0 });
+                if (dd.d !== day) dd = { d: day, n: 0 };
+                if (claimed.indexOf(b.id) > -1) note.textContent = 'استلمت هدية هالبطاقة قبل 💛';
+                else if (dd.n >= DAILY_CAP) note.textContent = 'وصلت الحد اليومي لاستلام الهدايا (' + DAILY_CAP + ')، الرسالة إلك بس الهدية بكرا.';
+                else {
+                    claim.hidden = false; claim.textContent = 'استلم هديتك +' + b.g + ' نقطة 🎁';
+                    claim.addEventListener('click', function (ev) {
+                        claimed.push(b.id); store.set('o2.cards.claimed', claimed.slice(-50)); dd.n++; store.set('o2.cards.day', dd);
+                        earn(b.g, 'بطاقة من O2'); claim.hidden = true;
+                        note.textContent = 'تمام! ضفنا ' + b.g + ' نقطة لرصيدك 🎉'; confetti(ev.clientX, ev.clientY); vib([15, 30, 15]); sound('win');
+                    });
+                }
+            }
+            reply.addEventListener('click', function () { close(); openSend(); });
+        });
+    }
+
+    var sendBtn = $('#open-card');
+    if (sendBtn) sendBtn.addEventListener('click', openSend);
+
+    var launched = false;
+    function launch() { if (launched) return; var b = readHash(); if (!b) return; launched = true; showCard(b); }
+    if (readHash()) {
+        if (window.__o2IntroPlaying) { window.addEventListener('o2-intro-reveal', function () { setTimeout(launch, 700); }, { once: true }); setTimeout(launch, 14000); }
+        else setTimeout(launch, 500);
+    }
+    window.addEventListener('hashchange', function () { var b = readHash(); if (b) { launched = true; showCard(b); } });
 })();
