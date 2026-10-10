@@ -195,3 +195,11 @@ html.lenis,html.lenis body{height:auto}
 .sw-slot .ph img{width:100%;height:100%;object-fit:cover}
 .sw-slot .nm{font-size:1.3rem;font-weight:900;min-height:1.8rem}
 .sw-slot.spin .nm{opacity:.6;filter:blur(1px)}
+
+/* ---------- هدايا الترقية ---------- */
+.tr-node em.tr-gift{position:absolute;top:calc(100% + 38px);left:50%;transform:translateX(-50%);font-style:normal;font-size:.62rem;font-weight:800;color:var(--c);white-space:nowrap}
+.tr-node:not(.done):not(.cur) em.tr-gift{opacity:.85}
+.lvl-gift{display:inline-block;margin-top:var(--sp-3);padding:.45rem 1.1rem;border-radius:99px;font-weight:800;font-size:.95rem;color:#140d00;
+    background:linear-gradient(135deg,var(--t-a),var(--t-b));box-shadow:0 0 24px color-mix(in srgb,var(--t-accent) 55%,transparent)}
+
+.tier-road{padding-bottom:4.6rem}

@@ -9,19 +9,19 @@
     var REDUCE = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
 
     var TIERS = [
-        { id: 'bronze', name: 'برونزي', adj: 'البرونزية', min: 0, icon: 'i-coins',
+        { id: 'bronze', name: 'برونزي', adj: 'البرونزية', min: 0, gift: 0, icon: 'i-coins',
           accent: '#cd7f32', a: '#f1b27a', b: '#8a4f1a', liq: ['#f6b36a', '#cd7f32', '#7a4414'],
           coin: { f: 'linear-gradient(135deg,#ffe2c2 0%,#e0a064 42%,#8a4f1a 100%)', k: 'linear-gradient(135deg,#d99556,#7a4414)', s: ['#5c330d', '#7a4414'] } },
-        { id: 'silver', name: 'فضي', adj: 'الفضية', min: 1000, icon: 'i-star',
+        { id: 'silver', name: 'فضي', adj: 'الفضية', min: 1000, gift: 0, icon: 'i-star',
           accent: '#cbd5e1', a: '#f8fafc', b: '#94a3b8', liq: ['#e2e8f0', '#94a3b8', '#475569'],
           coin: { f: 'linear-gradient(135deg,#ffffff 0%,#cbd5e1 42%,#64748b 100%)', k: 'linear-gradient(135deg,#cbd5e1,#64748b)', s: ['#3b4658', '#586478'] } },
-        { id: 'gold', name: 'ذهبي', adj: 'الذهبية', min: 2500, icon: 'i-crown',
+        { id: 'gold', name: 'ذهبي', adj: 'الذهبية', min: 2500, gift: 300, icon: 'i-crown',
           accent: '#facc15', a: '#fde047', b: '#ca8a04', liq: ['#ffe066', '#f5b301', '#a86a00'],
           coin: { f: 'linear-gradient(135deg,#fff7c2 0%,#f7c948 42%,#c58a12 100%)', k: 'linear-gradient(135deg,#f0c24a,#b8860b)', s: ['#8a5a0b', '#a8741a'] } },
-        { id: 'platinum', name: 'بلاتيني', adj: 'البلاتينية', min: 5000, icon: 'i-gem',
+        { id: 'platinum', name: 'بلاتيني', adj: 'البلاتينية', min: 5000, gift: 500, icon: 'i-gem',
           accent: '#38bdf8', a: '#bae6fd', b: '#0284c7', liq: ['#bae6fd', '#38bdf8', '#0c5a85'],
           coin: { f: 'linear-gradient(135deg,#f0fbff 0%,#7dd3fc 42%,#0369a1 100%)', k: 'linear-gradient(135deg,#7dd3fc,#0369a1)', s: ['#0b4a6e', '#0e638f'] } },
-        { id: 'diamond', name: 'ماسي', adj: 'الماسية', min: 10000, icon: 'i-flame',
+        { id: 'diamond', name: 'ماسي', adj: 'الماسية', min: 10000, gift: 1000, icon: 'i-flame',
           accent: '#c084fc', a: '#e9d5ff', b: '#7e22ce', liq: ['#e9b8ff', '#a855f7', '#5b1a99'],
           coin: { f: 'linear-gradient(135deg,#fbf0ff 0%,#d8b4fe 42%,#7e22ce 100%)', k: 'linear-gradient(135deg,#d8b4fe,#7e22ce)', s: ['#4c1580', '#6528a3'] } }
     ];
@@ -35,10 +35,12 @@
         try {
             var o = JSON.parse(localStorage.getItem(KEY));
             if (o && isFinite(o.balance) && isFinite(o.lifetime)) {
-                var l = Math.max(0, o.lifetime | 0); return { lifetime: l, balance: Math.min(Math.max(0, o.balance | 0), l) };
+                var l = Math.max(0, o.lifetime | 0);
+                return { lifetime: l, balance: Math.min(Math.max(0, o.balance | 0), l),
+                         gi: isFinite(o.gi) ? Math.min(Math.max(0, o.gi | 0), TIERS.length - 1) : info(l).i, pg: Math.max(0, o.pg | 0) };
             }
         } catch (e) {}
-        return { balance: 3250, lifetime: 3250 };
+        return { balance: 3250, lifetime: 3250, gi: info(3250).i, pg: 0 };
     }
     function save() { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} }
     function later(ms, fn) { timers.push(setTimeout(fn, ms)); }
@@ -107,7 +109,7 @@
     function buildRoad() {
         var r = $('tier-road'); if (!r) return;
         r.innerHTML = TIERS.map(function (t, i) {
-            var node = '<div class="tr-node" data-i="' + i + '" style="--c:' + t.accent + '"><svg class="ic" aria-hidden="true"><use href="#' + t.icon + '"/></svg><b>' + t.name + '</b><small>' + fmt(t.min) + '</small></div>';
+            var node = '<div class="tr-node" data-i="' + i + '" style="--c:' + t.accent + '"><svg class="ic" aria-hidden="true"><use href="#' + t.icon + '"/></svg><b>' + t.name + '</b><small>' + fmt(t.min) + '</small>' + (t.gift ? '<em class="tr-gift">🎁 +' + fmt(t.gift) + '</em>' : '') + '</div>';
             var link = i < TIERS.length - 1 ? '<div class="tr-link" data-l="' + i + '" style="z-index: -1; --c1:' + t.accent + ';--c2:' + TIERS[i + 1].accent + '"><i class="tr-fill"></i><i class="tr-spark"></i></div>' : '';
             return node + link;
         }).join('');
@@ -125,7 +127,7 @@
         });
         var note = $('tr-note'); if (!note) return;
         note.innerHTML = I.nx
-            ? ' <small>النقاط اللي بتصرفها ما بتنقص من مستواك</small>'
+            ? (I.nx.gift ? '🎁 ترقّى لمستوى ' + I.nx.name + ' واربح <b>+' + fmt(I.nx.gift) + '</b> نقطة هدية' : '') + '<small>النقاط اللي بتصرفها ما بتنقص من مستواك</small>'
             : '👑 وصلت لأعلى مستوى<small>النقاط اللي بتصرفها ما بتنقص من مستواك</small>';
     }
 
@@ -180,10 +182,10 @@
     }
 
     /* ---------- الترقية ---------- */
-    function levelUp(oi, ni) {
+    function levelUp(oi, ni, gift) {
         busy = true;
         var oldT = TIERS[oi], nt = TIERS[ni], oldSpan = TIERS[oi + 1].min - oldT.min;
-        if (REDUCE) { busy = false; renderTier({}); banner('🎉 ترقية! وصلت لمستوى ' + nt.name, false); return; }
+        if (REDUCE) { busy = false; renderTier({}); banner('🎉 ترقية! وصلت لمستوى ' + nt.name + (gift ? ' · هدية +' + fmt(gift) + ' نقطة 🎁' : ''), false); claimPending(); return; }
         hideBanner();
         setBottle(100, false); tweenNums(100, oldSpan, oldSpan, 0, false);
         later(1650, function () {                         // السائل وصل لفوق
@@ -198,20 +200,22 @@
             var set = function (id, v) { var e = $(id); if (e) e.textContent = v; };
             set('tier-cur-name', nt.name); set('tier-badge-txt', 'العضوية ' + nt.adj);
             var ico = $('tier-ico'); if (ico) ico.setAttribute('href', '#' + nt.icon);
-            banner('🎉 مبروك! ترقّيت لمستوى ' + nt.name, false);
-            showLvl(nt); snd('levelup');
+            banner('🎉 مبروك! ترقّيت لمستوى ' + nt.name + (gift ? ' · هدية +' + fmt(gift) + ' نقطة 🎁' : ''), false);
+            showLvl(nt, gift); snd('levelup');
             if (window.confettiAt) { var w = window.innerWidth; confettiAt(w * .3, 200, 60); setTimeout(function () { confettiAt(w * .7, 200, 60); }, 250); }
             var I = info(st.lifetime); updateRoad(I, false);
             var node = document.querySelector('#tier-road .tr-node[data-i="' + ni + '"]'); if (node) { node.classList.add('pop'); setTimeout(function () { node.classList.remove('pop'); }, 1000); }
         });
+        if (gift) later(3500, claimPending);              // الهدية بتنضاف والمستخدم شايف شاشة الترقية
         later(4900, function () {                         // تفريغ الزجاجة بلون السائل الجديد
             var b = $('o2-bottle'); b.classList.remove('full', 'celebrate');
             busy = false; needMax = null; renderTier({ theme: false });
+            if (st.pg) claimPending();                    // احتياط: هدية ما انضافت (ترقية وقت الأنيميشن)
         });
     }
-    function showLvl(t) {
+    function showLvl(t, gift) {
         var d = document.createElement('div'); d.className = 'lvl-up';
-        d.innerHTML = '<div class="lvl-card"><div class="lvl-ring"><svg class="ic ic-fill" aria-hidden="true"><use href="#' + t.icon + '"/></svg></div><small>ترقية جديدة</small><b>مستوى ' + t.name + '</b></div>';
+        d.innerHTML = '<div class="lvl-card"><div class="lvl-ring"><svg class="ic ic-fill" aria-hidden="true"><use href="#' + t.icon + '"/></svg></div><small>ترقية جديدة</small><b>مستوى ' + t.name + '</b>' + (gift ? '<span class="lvl-gift">🎁 هدية الترقية +' + fmt(gift) + ' نقطة</span>' : '') + '</div>';
         document.body.appendChild(d); void d.offsetWidth; d.classList.add('show');
         setTimeout(function () { d.classList.remove('show'); setTimeout(function () { d.remove(); }, 600); }, 2300);
     }
@@ -220,12 +224,24 @@
     function earn(n, reason, o) {
         n = Math.round(n); if (!(n > 0)) return;
         var oi = info(st.lifetime).i;
-        st.lifetime += n; st.balance += n; save();
-        var ni = info(st.lifetime).i;
+        st.lifetime += n; st.balance += n;
+        var ni = info(st.lifetime).i, gift = 0;
+        for (var k = st.gi + 1; k <= ni; k++) gift += TIERS[k].gift || 0;   // كل مستوى بتعدّيه بتاخد هديته مرة وحدة بس
+        if (ni > st.gi) st.gi = ni;
+        if (gift) st.pg = (st.pg | 0) + gift;                              // معلّقة لحد ما تنعرض، ومحفوظة لو سكّر الصفحة
+        save();
         renderBalance(true, n);
         if (!o || o.sound !== false) snd('coin');
         if (busy) return;
-        if (ni > oi) levelUp(oi, ni); else renderTier({ theme: false });
+        if (ni > oi) levelUp(oi, ni, gift); else { renderTier({ theme: false }); if (st.pg) claimPending(); }
+    }
+    function claimPending() {
+        var g = st.pg | 0; if (!(g > 0)) return;
+        st.pg = 0; st.balance += g; st.lifetime += g; save();
+        renderBalance(true, g);
+        toast('🎁 هدية الترقية: +' + fmt(g) + ' نقطة'); snd('win');
+        var row = $('pts-row'); if (row && window.confettiAt) { var b = row.getBoundingClientRect(); confettiAt(b.left + b.width / 2, b.top, 36); }
+        if (!busy) renderTier({ theme: false });
     }
     function spend(n, reason) {
         n = Math.round(n); if (!(n > 0)) return false;
@@ -239,12 +255,14 @@
     function set(l, b) {
         clearTimers(); busy = false; hideBanner(); needMax = null;
         var bt = $('o2-bottle'); if (bt) bt.classList.remove('full', 'celebrate');
-        st.lifetime = Math.max(0, Math.round(l)); st.balance = Math.min(Math.max(0, Math.round(b)), st.lifetime); save();
+        st.lifetime = Math.max(0, Math.round(l)); st.balance = Math.min(Math.max(0, Math.round(b)), st.lifetime);
+        st.gi = info(st.lifetime).i; st.pg = 0; save();
         renderBalance(true); renderTier({});
     }
     function start() {
         started = true; shownBal = 0; needMax = null;
         renderBalance(true); renderTier({});
+        if (st.pg) later(1500, claimPending);
         var I = info(st.lifetime);
         if (!I.nx) { var b = $('o2-bottle'); if (b) b.classList.add('full'); }
     }
