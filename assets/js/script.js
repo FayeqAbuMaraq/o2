@@ -53,12 +53,14 @@ function openMenuVideoModal(videoSourceUrl) {
         // فحص نوع الرابط إذا كان ملف محلي MP4 أو رابط خارجي متوافق لتحديد طريقة العرض
         if (videoSourceUrl.endsWith('.mp4') || !videoSourceUrl.includes('iframe')) {
             wrapper.innerHTML = `
-                <div class="w-full relative bg-black" style="padding-bottom: 177.778%; height: 0;">
-                    <video id="activeMenuVideo" class="absolute inset-0 w-full h-full object-cover" controls playsinline autoplay>
-                        <source src="${videoSourceUrl}" type="video/mp4">
-                        متصفحك لا يدعم تشغيل الفيديو.
-                    </video>
-                </div>
+            <div class="w-full relative bg-black" style="padding-bottom: 177.778%; height: 0;"> 
+                <video id="activeMenuVideo" class="absolute inset-0 w-full h-full object-contain" controls playsinline autoplay> 
+                    <source src="${videoSourceUrl}" type="video/mp4"> 
+                    متصفحك لا يدعم تشغيل الفيديو. 
+                </video> 
+            </div>
+
+
             `;
             
             // التعامل مع قيود التشغيل التلقائي بالمتصفحات لملفات mp4 المباشرة
