@@ -7,8 +7,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="O2 Rewards">
-<link rel="stylesheet" href="styles.css">
-<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="assets/css/styles.css">
+<link rel="apple-touch-icon" href="assets/media/icon-192.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>O2 Rewards - برنامج الولاء</title>
@@ -19,8 +19,8 @@
     <meta name="color-scheme" content="dark">
     <script>document.documentElement.classList.add("js")</script>
     <!-- Tailwind (مترجم بالـ build) — لازم ييجي بعد styles.css -->
-    <link rel="stylesheet" href="tailwind.css">
-<link rel="stylesheet" href="loyalty.css">
+    <link rel="stylesheet" href="assets/css/tailwind.css">
+<link rel="stylesheet" href="assets/css/loyalty.css">
     
     
 
@@ -87,7 +87,7 @@
     <script>
     (function () {
         var im = document.querySelector('#o2-intro img');
-        var src = im ? im.getAttribute('src') : 'o2.png';
+        var src = im ? im.getAttribute('src') : 'assets/media/o2.png';
         document.documentElement.style.setProperty('--o2-logo', 'url("' + src + '")');
     })();
     </script>
@@ -187,7 +187,7 @@
     <!-- Hero background video -->
     <div class="hero-video" id="hero-video" aria-hidden="true">
         <video id="hero-bg" autoplay muted loop playsinline preload="auto" disablepictureinpicture disableremoteplayback>
-            <source src="hero.mp4" type="video/mp4">
+            <source src="assets/media/hero.mp4" type="video/mp4">
         </video>
     </div>
 
@@ -219,7 +219,7 @@
                 <div class="flex-shrink-0 flex items-center gap-3 animate-pulse-slow">
                     <!-- Using the provided logo image -->
                     <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center p-1 shadow-[0_0_15px_rgba(230,0,0,0.5)]">
-                        <img src="o2.png" alt="O2 Logo" class="h-full w-auto object-contain">
+                        <img src="assets/media/o2.png" alt="O2 Logo" class="h-full w-auto object-contain">
                     </div>
                     <span class="text-2xl font-black tracking-wider">O<span class="text-o2-red">2</span> REWARDS</span>
                 </div>
@@ -240,7 +240,7 @@
                     <button type="button" id="snd-btn" class="snd-btn" aria-label="كتم الصوت" aria-pressed="false"><svg class="ic" aria-hidden="true"><use id="snd-ico" href="#i-volume-2"/></svg></button>
                     <div class="flex items-center gap-2 cursor-pointer group">
                         <div class="w-10 h-10 rounded-full border-2 border-o2-red overflow-hidden group-hover:shadow-[0_0_10px_#e60000] transition-all">
-                            <img src="o2.png" alt="User" class="w-full h-full object-cover">
+                            <img src="assets/media/o2.png" alt="User" class="w-full h-full object-cover">
                         </div>
                         <span class="hidden md:block text-sm font-semibold">أهلاً، أحمد</span>
                         <svg class="ic text-xs text-zinc-400 group-hover:text-o2-red transition-colors" aria-hidden="true"><use href="#i-chevron-down"/></svg>
@@ -604,7 +604,7 @@
             <img class="cake-img w-full h-full object-cover" loading="lazy" src="https://i.postimg.cc/vTVVv12p/image-(8).jpg" alt="بيف برجر">
             <div class="absolute inset-0 bg-gradient-to-t from-o2card via-o2card/50 to-transparent"></div>
             <span class="absolute top-3 right-3 text-base font-black px-3.5 py-1 cake-price bg-o2red text-white rounded-full shadow-lg shadow-o2red/40 z-10">30 ₪</span>
-            <button type="button" onclick="openMenuVideoModal('o2.mp4')" class="absolute bottom-3 left-3 bg-black/70 hover:bg-o2red text-white text-xs font-bold px-3 py-2 rounded-lg flex items-center gap-2 transition-colors duration-200 z-20 backdrop-blur-sm focus:outline-none cursor-pointer">
+            <button type="button" onclick="openMenuVideoModal('assets/media/o2.mp4')" class="absolute bottom-3 left-3 bg-black/70 hover:bg-o2red text-white text-xs font-bold px-3 py-2 rounded-lg flex items-center gap-2 transition-colors duration-200 z-20 backdrop-blur-sm focus:outline-none cursor-pointer">
                 <svg class="ic text-[10px] ic-fill" aria-hidden="true"><use href="#i-play"/></svg>
                 <span>معاينة</span>
             </button>
@@ -1946,7 +1946,7 @@
             <img class="cake-img w-full h-full object-cover" loading="lazy" src="https://i.postimg.cc/wMChK5sJ/image-(25).jpg" alt="قالب كيك سبشل">
             <div class="absolute inset-0 bg-gradient-to-t from-o2card via-o2card/50 to-transparent"></div>
             <span class="absolute top-3 right-3 text-base font-black px-3.5 py-1 cake-price bg-o2red text-white rounded-full shadow-lg shadow-o2red/40 z-10">80/100 ₪</span>
-            <button type="button" onclick="openMenuVideoModal('cake.mp4')" class="absolute bottom-3 left-3 bg-black/70 hover:bg-o2red text-white text-xs font-bold px-3 py-2 rounded-lg flex items-center gap-2 transition-colors duration-200 z-20 backdrop-blur-sm focus:outline-none cursor-pointer">
+            <button type="button" onclick="openMenuVideoModal('assets/media/cake.mp4')" class="absolute bottom-3 left-3 bg-black/70 hover:bg-o2red text-white text-xs font-bold px-3 py-2 rounded-lg flex items-center gap-2 transition-colors duration-200 z-20 backdrop-blur-sm focus:outline-none cursor-pointer">
                 <svg class="ic text-[10px] ic-fill" aria-hidden="true"><use href="#i-play"/></svg>
                 <span>معاينة</span>
             </button>
@@ -2127,7 +2127,7 @@
     <footer class="border-t border-line mt-20 py-8 text-center relative z-10 bg-surface-1">
         <div class="flex justify-center items-center gap-2 mb-4">
              <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center p-1">
-                <img src="o2.png" alt="O2 Logo" class="h-full w-auto object-contain">
+                <img src="assets/media/o2.png" alt="O2 Logo" class="h-full w-auto object-contain">
             </div>
             <span class="font-bold text-xl">O2</span>
         </div>
@@ -2149,10 +2149,10 @@
     <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.20/dist/lenis.min.js"></script>
-<script src="sound.js"></script>
-<script src="script.js"></script>
-<script src="loyalty.js"></script>
-<script src="swipe.js"></script>
-<script src="motion.js"></script>
+<script src="assets/js/sound.js"></script>
+<script src="assets/js/script.js"></script>
+<script src="assets/js/loyalty.js"></script>
+<script src="assets/js/swipe.js"></script>
+<script src="assets/js/motion.js"></script>
     </body>
 </html>

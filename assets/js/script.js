@@ -1239,7 +1239,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
     function node(tag, cls, text) { var n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; }
     function cardShell() {
         var card = node('div', 'gc-card'), top = node('div', 'gc-top'), logo = node('span', 'gc-logo');
-        var img = node('img'); img.src = 'o2.png'; img.alt = ''; img.onerror = function () { img.remove(); logo.textContent = 'O2'; };
+        var img = node('img'); img.src = 'assets/media/o2.png'; img.alt = ''; img.onerror = function () { img.remove(); logo.textContent = 'O2'; };
         logo.appendChild(img);
         var brand = node('span', 'gc-brand'); brand.appendChild(document.createTextNode('O')); brand.appendChild(node('span', null, '2')); brand.appendChild(document.createTextNode(' REWARDS'));
         top.appendChild(logo); top.appendChild(brand);
