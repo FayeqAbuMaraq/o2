@@ -1,7 +1,7 @@
 /* loyalty.js — نظام النقاط والمستويات
    - الرصيد (balance): بنقص لما تصرف نقاط على مكافأة
    - الإجمالي (lifetime): كل النقاط اللي كسبتها — بتحسب للمستوى حتى لو صرفتها
-   - 5 مستويات، الزجاجة بتتعبى لحد المستوى التالي وبعدين بتفرغ بلون سائل جديد
+   - 4 مستويات (فضي ← ذهبي ← بلاتيني ← ماسي)، الزجاجة بتتعبى لحد المستوى التالي وبعدين بتفرغ بلون سائل جديد
    - O2_DEMO: لوحة تجربة مؤقتة (احذفها بوضع window.O2_DEMO = false أو حذف البلوك) */
 (function () {
     'use strict';
@@ -9,10 +9,7 @@
     var REDUCE = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
 
     var TIERS = [
-        { id: 'bronze', name: 'برونزي', adj: 'البرونزية', min: 0, gift: 0, icon: 'i-coins',
-          accent: '#cd7f32', a: '#f1b27a', b: '#8a4f1a', liq: ['#f6b36a', '#cd7f32', '#7a4414'],
-          coin: { f: 'linear-gradient(135deg,#ffe2c2 0%,#e0a064 42%,#8a4f1a 100%)', k: 'linear-gradient(135deg,#d99556,#7a4414)', s: ['#5c330d', '#7a4414'] } },
-        { id: 'silver', name: 'فضي', adj: 'الفضية', min: 1000, gift: 0, icon: 'i-star',
+        { id: 'silver', name: 'فضي', adj: 'الفضية', min: 0, gift: 0, icon: 'i-star',
           accent: '#cbd5e1', a: '#f8fafc', b: '#94a3b8', liq: ['#e2e8f0', '#94a3b8', '#475569'],
           coin: { f: 'linear-gradient(135deg,#ffffff 0%,#cbd5e1 42%,#64748b 100%)', k: 'linear-gradient(135deg,#cbd5e1,#64748b)', s: ['#3b4658', '#586478'] } },
         { id: 'gold', name: 'ذهبي', adj: 'الذهبية', min: 2500, gift: 300, icon: 'i-crown',
@@ -37,12 +34,12 @@
             if (o && isFinite(o.balance) && isFinite(o.lifetime)) {
                 var l = Math.max(0, o.lifetime | 0);
                 return { lifetime: l, balance: Math.min(Math.max(0, o.balance | 0), l),
-                         gi: isFinite(o.gi) ? Math.min(Math.max(0, o.gi | 0), TIERS.length - 1) : info(l).i, pg: Math.max(0, o.pg | 0) };
+                         gi: (o.v === 2 && isFinite(o.gi)) ? Math.min(Math.max(0, o.gi | 0), TIERS.length - 1) : info(l).i, pg: Math.max(0, o.pg | 0) };
             }
         } catch (e) {}
         return { balance: 3250, lifetime: 3250, gi: info(3250).i, pg: 0 };
     }
-    function save() { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} }
+    function save() { try { localStorage.setItem(KEY, JSON.stringify(Object.assign({ v: 2 }, st))); } catch (e) {} }
     function later(ms, fn) { timers.push(setTimeout(fn, ms)); }
     function clearTimers() { timers.forEach(clearTimeout); timers = []; }
 
