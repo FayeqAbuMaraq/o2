@@ -59,7 +59,6 @@ function openMenuVideoModal(videoSourceUrl) {
         متصفحك لا يدعم تشغيل الفيديو.
     </video>
 </div>
-
             `;
             
             // التعامل مع قيود التشغيل التلقائي بالمتصفحات لملفات mp4 المباشرة
