@@ -1,4 +1,4 @@
-const CACHE_NAME = 'o2-rewards-v13';
+const CACHE_NAME = 'o2-rewards-v15';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -15,6 +15,7 @@ const ASSETS_TO_CACHE = [
   './assets/css/premium.css',
   './assets/js/swipe.js',
   './assets/js/motion.js',
+  './assets/js/banner.js',
   './assets/media/icon-192.png',
   './assets/media/icon-512.png'
 ];
