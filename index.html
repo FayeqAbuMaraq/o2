@@ -386,6 +386,7 @@
             </div>
         </section>
 
+
         <!-- ===================== الهدايا والمزايا ===================== -->
         <section id="perks" data-reveal style="--i:2" class="perks scroll-mt-24" aria-labelledby="perks-title">
             <div class="perks-card">
@@ -393,20 +394,12 @@
                     <div>
                         <span class="eyebrow">برنامج الولاء</span>
                         <h2 id="perks-title">الهدايا والمزايا</h2>
-                        <p>كل ما ترتقي بمستواك بتفتح هدايا فورية وفرص أكبر بالسحوبات والجوائز الكبرى.</p>
+                        <p>اختر أي مستوى وشوف هداياه ومزاياه. كل ما ترتقي بتفتح هدايا فورية وفرص أكبر بالسحوبات.</p>
                     </div>
                     <div class="perks-you"><small>مستواك الحالي</small><b id="perks-cur">—</b></div>
                 </header>
-                <div class="perks-cols">
-                    <div class="perks-col">
-                        <h3><svg class="ic" aria-hidden="true"><use href="#i-gift"/></svg>الهدايا والميزات الفورية</h3>
-                        <ul class="pk-list" id="perks-instant"></ul>
-                    </div>
-                    <div class="perks-col">
-                        <h3><svg class="ic" aria-hidden="true"><use href="#i-trophy"/></svg>السحوبات والمكافآت الكبرى</h3>
-                        <ul class="pk-list" id="perks-draws"></ul>
-                    </div>
-                </div>
+                <div class="pk-tabs" id="pk-tabs" role="tablist" aria-label="مستويات العضوية — اختر مستوى لتشوف هداياه"></div>
+                <div class="pk-panel" id="pk-panel" role="tabpanel" aria-live="polite"></div>
                 <p class="perks-note">المستوى بيحسب من النقاط التراكمية، وصرفك للنقاط على المكافآت ما بنزّلك مستوى.</p>
             </div>
         </section>
@@ -694,34 +687,6 @@
         </div>
     </article>
 
-    <!-- بيغ ماك -->
-    <article class="cake-card meal-card w-[75vw] sm:w-[300px] shrink-0 snap-center bg-o2card border border-zinc-800 rounded-2xl overflow-hidden flex flex-col h-full">
-        <div class="relative w-full aspect-[4/3] bg-zinc-950 overflow-hidden shrink-0">
-            <img class="cake-img w-full h-full object-cover" loading="lazy" src="https://i.postimg.cc/hjhxfZLL/image-(11).jpg" alt="بيغ ماك">
-            <div class="absolute inset-0 bg-gradient-to-t from-o2card via-o2card/50 to-transparent"></div>
-            <span class="absolute top-3 right-3 text-base font-black px-3.5 py-1 cake-price bg-o2red text-white rounded-full shadow-lg shadow-o2red/40 z-10">40 ₪</span>
-            <!-- زر تكبير الصورة: غيّر مسار صورة المكونات في data-zoom-ing -->
-            <button type="button" class="zoom-btn" data-zoom data-zoom-title="بيغ ماك" data-zoom-img="https://i.postimg.cc/hjhxfZLL/image-(11).jpg" data-zoom-ing="assets/media/123.jpg" aria-label="تكبير الصورة">
-                <svg class="ic" aria-hidden="true"><use href="#i-zoom-in"/></svg>
-            </button>
-                        <button type="button" onclick="openMenuVideoModal('assets/media/Animate.mp4')" class="absolute bottom-3 left-3 bg-black/70 hover:bg-o2red text-white text-xs font-bold px-3 py-2 rounded-lg flex items-center gap-2 transition-colors duration-200 z-20 backdrop-blur-sm focus:outline-none cursor-pointer">
-                <svg class="ic text-[10px] ic-fill" aria-hidden="true"><use href="#i-play"/></svg>
-                <span>معاينة</span>
-            </button>
-        </div>
-        <div class="p-5 flex flex-col flex-grow justify-between">
-            <div>
-                <div class="flex items-center gap-3 mb-3">
-                    <svg class="ic text-o2red" aria-hidden="true"><use href="#i-sandwich"/></svg>
-                    <h3 class="text-xl font-bold text-gray-100 meal-title">بيغ ماك</h3>
-                </div>
-                <div class="h-px bg-gradient-to-l from-o2red/60 to-transparent mb-3"></div>
-                <h4 class="text-o2red font-bold text-sm mb-1">المكونات:</h4>
-                <p class="text-zinc-300 text-sm leading-relaxed meal-ingredients">خبزة برجر - بيكانتي - خس - شرائح بصل - مخلل خيار - بندورة - قطعتين لحم مشوي - جبنة برجر.</p>
-            </div>
-        </div>
-    </article>
-
     <!-- بيف برجر -->
     <article class="cake-card meal-card w-[75vw] sm:w-[300px] shrink-0 snap-center bg-o2card border border-zinc-800 rounded-2xl overflow-hidden flex flex-col h-full">
         <div class="relative w-full aspect-[4/3] bg-zinc-950 overflow-hidden shrink-0">
@@ -769,6 +734,35 @@
             </div>
         </div>
     </article>
+
+    <!-- بيغ ماك -->
+    <article class="cake-card meal-card w-[75vw] sm:w-[300px] shrink-0 snap-center bg-o2card border border-zinc-800 rounded-2xl overflow-hidden flex flex-col h-full">
+        <div class="relative w-full aspect-[4/3] bg-zinc-950 overflow-hidden shrink-0">
+            <img class="cake-img w-full h-full object-cover" loading="lazy" src="https://i.postimg.cc/hjhxfZLL/image-(11).jpg" alt="بيغ ماك">
+            <div class="absolute inset-0 bg-gradient-to-t from-o2card via-o2card/50 to-transparent"></div>
+            <span class="absolute top-3 right-3 text-base font-black px-3.5 py-1 cake-price bg-o2red text-white rounded-full shadow-lg shadow-o2red/40 z-10">40 ₪</span>
+            <!-- زر تكبير الصورة: غيّر مسار صورة المكونات في data-zoom-ing -->
+            <button type="button" class="zoom-btn" data-zoom data-zoom-title="بيغ ماك" data-zoom-img="https://i.postimg.cc/hjhxfZLL/image-(11).jpg" data-zoom-ing="assets/media/123.jpg" aria-label="تكبير الصورة">
+                <svg class="ic" aria-hidden="true"><use href="#i-zoom-in"/></svg>
+            </button>
+                        <button type="button" onclick="openMenuVideoModal('assets/media/Animate.mp4')" class="absolute bottom-3 left-3 bg-black/70 hover:bg-o2red text-white text-xs font-bold px-3 py-2 rounded-lg flex items-center gap-2 transition-colors duration-200 z-20 backdrop-blur-sm focus:outline-none cursor-pointer">
+                <svg class="ic text-[10px] ic-fill" aria-hidden="true"><use href="#i-play"/></svg>
+                <span>معاينة</span>
+            </button>
+        </div>
+        <div class="p-5 flex flex-col flex-grow justify-between">
+            <div>
+                <div class="flex items-center gap-3 mb-3">
+                    <svg class="ic text-o2red" aria-hidden="true"><use href="#i-sandwich"/></svg>
+                    <h3 class="text-xl font-bold text-gray-100 meal-title">بيغ ماك</h3>
+                </div>
+                <div class="h-px bg-gradient-to-l from-o2red/60 to-transparent mb-3"></div>
+                <h4 class="text-o2red font-bold text-sm mb-1">المكونات:</h4>
+                <p class="text-zinc-300 text-sm leading-relaxed meal-ingredients">خبزة برجر - بيكانتي - خس - شرائح بصل - مخلل خيار - بندورة - قطعتين لحم مشوي - جبنة برجر.</p>
+            </div>
+        </div>
+    </article>
+
 
     <!-- تشكن برجر -->
     <article class="cake-card meal-card w-[75vw] sm:w-[300px] shrink-0 snap-center bg-o2card border border-zinc-800 rounded-2xl overflow-hidden flex flex-col h-full">
@@ -2334,5 +2328,5 @@
   });
 })();
 </script>
-</body>
+    </body>
 </html>

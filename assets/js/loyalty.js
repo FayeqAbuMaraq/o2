@@ -144,6 +144,7 @@
             : ' وصلت لأعلى مستوى<small>المستوى بيحسب من النقاط التراكمية — صرفك للنقاط ما بنزّلك مستوى</small>' + TAP;
     }
 
+
     /* ---------- بالون المستوى (Tooltip) + بالون الإرشاد ---------- */
     var tip = null, tipKey = null, tipHideT = 0, hintEl = null, hintT = 0, HINT_KEY = 'o2.tierhint.v1';
     function esc(x) { return String(x).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
@@ -221,29 +222,82 @@
         var io = new IntersectionObserver(function (es) { if (es[0].isIntersecting) { io.disconnect(); setTimeout(showHint, 1800); } }, { threshold: .9 });
         io.observe(r);
     }
-
-    /* ---------- قسم الهدايا والمزايا (بيتولّد من TIERS) ---------- */
+ /* ---------- قسم الهدايا والمزايا: تبويبات المستويات + كروت الهدايا (بيتولّد من TIERS) ---------- */
+    var pkSel = 0, pkCur = 0, pkManual = false;
+    function perkIcon(s) {
+        var m = [[/سحب/, 'i-ticket'], [/مشروب|عصير|قهوة/, 'i-glass-water'], [/ساندويتش/, 'i-sandwich'], [/وجبة|وجبات|عشاء/, 'i-utensils'], [/قسيمة/, 'i-ticket'],
+                 [/نقاط|نقطة/, 'i-coins'], [/دعوة|فعاليات/, 'i-bell'], [/أولوية/, 'i-flame2'], [/مكانة/, 'i-crown'], [/خدمة/, 'i-heart'], [/عروض/, 'i-star'], [/هدية/, 'i-gift']];
+        for (var k = 0; k < m.length; k++) if (m[k][0].test(s)) return m[k][1];
+        return 'i-gift';
+    }
+    function giftsFor(t, i) {
+        var g = [];
+        if (t.gift) g.push({ ic: 'i-coins', name: '+' + fmt(t.gift) + ' نقطة فورية', sub: 'هدية الترقية لهذا المستوى', tag: 'هدية الترقية' });
+        t.perks.forEach(function (p) { if (/هدية ترقية/.test(p)) return; g.push({ ic: perkIcon(p), name: p, sub: '', tag: 'ميزة' }); });
+        g.push({ ic: perkIcon(t.draw.prize), name: t.draw.prize, sub: t.draw.name + ' · ' + t.draw.when, tag: 'سحب', grand: i >= TIERS.length - 2 });
+        return g;
+    }
+    function centerTab(smooth) {
+        var box = $('pk-tabs'), b = $('pk-tab-' + pkSel); if (!box || !b || box.scrollWidth <= box.clientWidth + 1) return;
+        var r = b.getBoundingClientRect(), R = box.getBoundingClientRect();
+        var d = (r.left + r.width / 2) - (R.left + R.width / 2);       // يعمل مع RTL كمان، وما بيحرّك الصفحة نفسها
+        box.scrollTo({ left: box.scrollLeft + d, behavior: smooth && !REDUCE ? 'smooth' : 'auto' });
+    }
+    function drawTabs(smooth) {
+        var box = $('pk-tabs'); if (!box) return;
+        box.innerHTML = TIERS.map(function (t, i) {
+            var cur = i === pkCur, sel = i === pkSel;
+            return '<button type="button" role="tab" id="pk-tab-' + i + '" class="pk-tab' + (cur ? ' cur' : '') + (sel ? ' sel' : '') + (i > pkCur ? ' lock' : '') + '" data-i="' + i + '" aria-selected="' + sel + '" aria-controls="pk-panel" tabindex="' + (sel ? 0 : -1) + '" style="--c:' + t.accent + '">' +
+                (cur ? '<span class="pk-you">مستواك</span>' : '') +
+                '<span class="pk-ti">' + ico(t.icon, 'ic-fill') + '</span><b>' + t.name + '</b>' + (i > pkCur ? '<span class="pk-tl">' + ico('i-lock') + '</span>' : '') + '</button>';
+        }).join('');
+        centerTab(smooth);
+    }
+    function drawPanel(anim) {
+        var p = $('pk-panel'); if (!p) return;
+        var t = TIERS[pkSel], locked = pkSel > pkCur, need = Math.max(0, t.min - st.lifetime);
+        var chip = pkSel < pkCur ? 'وصلت له' : pkSel === pkCur ? 'مستواك الحالي' : 'مقفل';
+        p.setAttribute('aria-labelledby', 'pk-tab-' + pkSel);
+        p.style.setProperty('--c', t.accent);
+        p.innerHTML = '<div class="pk-ph"><div class="pk-pt"><small>' + t.ord + '</small><h3>' + t.name + '</h3><em>من ' + fmt(t.min) + ' نقطة تراكمية</em></div>' +
+            '<div class="pk-pr"><span class="pk-st' + (locked ? '' : ' on') + '">' + chip + '</span>' +
+            (locked ? '<div class="pk-need"><div class="pk-bar"><i style="width:' + Math.min(100, st.lifetime / t.min * 100).toFixed(1) + '%"></i></div><p>ناقصك <b>' + fmt(need) + '</b> نقطة تراكمية</p></div>' : '') + '</div></div>' +
+            '<ul class="pk-grid' + (anim ? ' in' : '') + '">' + giftsFor(t, pkSel).map(function (g, k) {
+                return '<li class="pk-card' + (g.grand ? ' grand' : '') + (locked ? ' lock' : '') + '" style="--k:' + k + '"><span class="pk-ctag">' + g.tag + '</span>' +
+                    (locked ? '<span class="pk-clock">' + ico('i-lock') + '</span>' : '') +
+                    '<span class="pk-cic">' + ico(g.ic) + '</span><b class="pk-cname">' + esc(g.name) + '</b>' + (g.sub ? '<small class="pk-csub">' + esc(g.sub) + '</small>' : '') +
+                    (g.grand ? '<em class="pk-badge">' + ico('i-trophy') + 'جائزة كبرى</em>' : '') + '</li>';
+            }).join('') + '</ul>';
+    }
+    function pkPick(i, manual, focus) {
+        i = Math.max(0, Math.min(TIERS.length - 1, i)); if (manual) pkManual = i !== pkCur;
+        var same = i === pkSel; pkSel = i; drawTabs(manual); if (!same || !$('pk-panel').firstChild) drawPanel(!REDUCE);
+        var b = $('pk-tab-' + i); if (b && focus) { b.focus({ preventScroll: true }); }
+    }
     function renderPerks() {
-        var a = $('perks-instant'), d = $('perks-draws'); if (!a || !d) return;
-        a.innerHTML = TIERS.map(function (t, i) {
-            return '<li class="pk-row" data-i="' + i + '" style="--c:' + t.accent + '"><span class="pk-ic">' + ico(t.icon, 'ic-fill') + '</span>' +
-                '<div class="pk-t"><small>' + t.ord + '</small><b>' + t.name + '</b><em>من ' + fmt(t.min) + ' نقطة تراكمية</em></div>' +
-                '<div class="pk-d"><span class="pk-gift">' + ico('i-gift') + (t.gift ? '+' + fmt(t.gift) + ' نقطة فورية' : 'مستوى البداية') + '</span>' +
-                '<span class="pk-perks">' + t.perks.map(esc).join(' · ') + '</span></div><span class="pk-lock">' + ico('i-lock') + '</span></li>';
-        }).join('');
-        d.innerHTML = TIERS.map(function (t, i) {
-            var grand = i >= TIERS.length - 2;
-            return '<li class="pk-row' + (grand ? ' grand' : '') + '" data-i="' + i + '" style="--c:' + t.accent + '"><span class="pk-ic">' + ico('i-ticket') + '</span>' +
-                '<div class="pk-t"><small>يفتح من مستوى ' + t.name + '</small><b>' + esc(t.draw.name) + '</b>' + (grand ? '<em class="pk-badge">' + ico('i-trophy') + 'جائزة كبرى</em>' : '') + '</div>' +
-                '<div class="pk-d"><span class="pk-prize">' + esc(t.draw.prize) + '</span><span class="pk-perks">' + esc(t.draw.when) + '</span></div><span class="pk-lock">' + ico('i-lock') + '</span></li>';
-        }).join('');
+        var box = $('pk-tabs'); if (!box || !$('pk-panel')) return;
+        pkCur = pkSel = info(st.lifetime).i; pkManual = false;
+        drawTabs(); drawPanel(false);
+        var re = function () { centerTab(false); };
+        window.addEventListener('load', re); window.addEventListener('resize', re);
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(re);
+        setTimeout(re, 400);
+        box.addEventListener('click', function (e) { var b = e.target.closest('.pk-tab'); if (b) pkPick(+b.dataset.i, true, true); });
+        box.addEventListener('keydown', function (e) {
+            var rtl = getComputedStyle(box).direction === 'rtl', d = e.key === 'ArrowRight' ? (rtl ? -1 : 1) : e.key === 'ArrowLeft' ? (rtl ? 1 : -1) : 0;
+            if (e.key === 'Home') d = -99; else if (e.key === 'End') d = 99;
+            if (!d) return; e.preventDefault(); pkPick(pkSel + d, true, true);
+        });
     }
     function perkState(I) {
         var pc = $('perks-cur'); if (pc) pc.textContent = I.t.name;
-        [].forEach.call(document.querySelectorAll('#perks .pk-row'), function (r) {
-            var i = +r.dataset.i; r.classList.toggle('on', i <= I.i); r.classList.toggle('cur', i === I.i);
-        });
+        if (!$('pk-tabs') || !$('pk-panel').firstChild) { pkCur = I.i; pkSel = I.i; return; }   // لسا ما انرسم
+        var lvl = I.i !== pkCur; pkCur = I.i;
+        if (lvl) pkManual = false;                          // ترقّيت: بنرجّعك لمستواك الجديد
+        var want = pkManual ? pkSel : pkCur, changed = want !== pkSel; pkSel = want;
+        drawTabs(); drawPanel(changed && !REDUCE);
     }
+
 
     /* ---------- عرض النقاط المتاح صرفها والمكافآت ---------- */
     function renderBalance(anim, delta) {
@@ -408,6 +462,7 @@
         var lt = $('lt-total'); if (lt) lt.textContent = '0';
         buildDemo();
     }
+
 
     /* ---------- لوحة التجربة المؤقتة ---------- */
     function buildDemo() {

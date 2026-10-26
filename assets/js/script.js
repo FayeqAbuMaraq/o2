@@ -45,6 +45,33 @@ function o2UpdateLockMeters(points) {
 
 
 
+// معاينة الصنف: بتفتح نافذة فيها اسم الصنف وسعره ومكوناته (بدل الصورة/الفيديو الأصلي)
+function openMenuIngredientsModal(btn) {
+    const modal = document.getElementById('globalMenuVideoModal');
+    const wrapper = document.getElementById('globalVideoWrapper');
+    const card = btn && btn.closest('.meal-card');
+    if (!modal || !wrapper || !card) return;
+    const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const title = (card.querySelector('.meal-title') || {}).textContent || '';
+    const price = (card.querySelector('.cake-price') || {}).textContent || '';
+    const ing = (card.querySelector('.meal-ingredients') || {}).textContent || '';
+    const parts = ing.split(/\s+[-–+]\s+|\s*[+]\s*/).map(s => s.replace(/[.\s]+$/, '').trim()).filter(Boolean);
+    wrapper.innerHTML =
+        '<div class="p-6 pt-14 text-right" dir="rtl">' +
+            '<div class="flex items-center justify-between gap-3 mb-4">' +
+                '<h3 class="text-2xl font-black text-white">' + esc(title.trim()) + '</h3>' +
+                '<span class="text-base font-black px-3 py-1 bg-o2red text-white rounded-full">' + esc(price.trim()) + '</span>' +
+            '</div>' +
+            '<div class="h-px bg-gradient-to-l from-o2red/60 to-transparent mb-4"></div>' +
+            '<h4 class="text-o2red font-bold text-sm mb-3">المكونات:</h4>' +
+            '<ul class="space-y-2">' +
+                parts.map(p => '<li class="flex items-center gap-2 text-zinc-200 text-sm"><span class="w-1.5 h-1.5 rounded-full bg-o2red shrink-0"></span>' + esc(p) + '</li>').join('') +
+            '</ul>' +
+        '</div>';
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
 function openMenuVideoModal(videoSourceUrl) {
     const modal = document.getElementById('globalMenuVideoModal');
     const wrapper = document.getElementById('globalVideoWrapper');
